@@ -1,7 +1,7 @@
 [project]
 name = "movie-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "A command-line movie database application that allows users to manage movies and their ratings and perform basic analytics."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = []

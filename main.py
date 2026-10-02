@@ -150,6 +150,36 @@ def search_movies(movies: dict[str, float]):
         print(f"{movie}: {rating}")
 
 
+def sort_movies_by_rating(movies: dict[str, float]):
+    """
+    Displays movies from highest to lowest rating.
+    """
+    print("\n" * 50)  # Clear the console
+    choice = input("Sort in ascending order (y/n): ")
+    descending: bool = True
+    if choice.lower() == "y":
+        descending = False
+    elif choice.lower() == "n":
+        descending = True
+    else:
+        print("Invalid input. Showing in descending order")
+
+    sorted_movies = sorted( 
+        movies.items(),
+        key=lambda item: item[1],
+        reverse=descending
+    )
+
+    
+    print("=" * 40)
+    print(f"{len(movies)} movies found in the database.")
+    print("List of Movies:")
+    print("-" * 40)
+    
+    for movie, rating in sorted_movies:
+        print(f"{movie}: {rating}")
+
+
 def delete_movie(movies: dict[str, float]):
     """
     Deletes a movie from the database.
@@ -177,6 +207,7 @@ def run_menu(movies: dict[str, float]):
         ("Show Statistics", generate_analytics),
         ("Show a random movie", fetch_random_movie),
         ("Search movies", search_movies),
+        ("Sort movies by rating", sort_movies_by_rating),
         ("Delete a movie", delete_movie),
         ("Exit", None),
     ]
