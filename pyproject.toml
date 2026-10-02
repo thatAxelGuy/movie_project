@@ -5,3 +5,6 @@ description = "A command-line movie database application that allows users to ma
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = []
+
+[tool.ruff.lint]
+select = ["E", "F", "ANN201"]

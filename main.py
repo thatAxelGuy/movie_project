@@ -7,7 +7,7 @@ import random
 from collections.abc import Callable
 
 
-def list_movies(movies: dict[str, float]):
+def list_movies(movies: dict[str, float]) -> None:
     """
     Lists all the movies in the database along with their ratings.
     """
@@ -21,7 +21,7 @@ def list_movies(movies: dict[str, float]):
         print(f"{movie}: {rating}")
 
 
-def add_movie(movies: dict[str, float]):
+def add_movie(movies: dict[str, float]) -> None:
     """
     Adds a new movie to the database with its rating.
     """
@@ -43,7 +43,7 @@ def add_movie(movies: dict[str, float]):
         print("Invalid input. Please enter a numeric value for the rating.")
 
 
-def update_movie_rating(movies: dict[str, float]):
+def update_movie_rating(movies: dict[str, float]) -> None:
     """
     Updates the rating of an existing movie in the database.
     """
@@ -65,7 +65,7 @@ def update_movie_rating(movies: dict[str, float]):
         print("Invalid input. Please enter a numeric value for the rating.")
 
 
-def generate_analytics(movies: dict[str, float]):
+def generate_analytics(movies: dict[str, float]) -> None:
     """
     Generates and displays analytics about the movies in the database.
     """
@@ -100,9 +100,8 @@ def generate_analytics(movies: dict[str, float]):
     print(f"Total number of movies: {total_movies}")
     print(f"Average rating: {average_rating:.2f}")
     if len(highest_rated_movies) > 1:
-        print(
-            f"Highest rated movies: {', '.join(highest_rated_movies)} ({highest_rating})"
-        )
+        print(f"Highest rated movies: {
+                ', '.join(highest_rated_movies)} ({highest_rating})")
     else:
         print(f"Highest rated movie: {highest_rated_movies[0]} ({highest_rating})")
     if len(lowest_rated_movies) > 1:
@@ -114,7 +113,7 @@ def generate_analytics(movies: dict[str, float]):
     print(f"Median rating: {median_rating:.2f}")
 
 
-def fetch_random_movie(movies: dict[str, float]):
+def fetch_random_movie(movies: dict[str, float]) -> None:
     """
     Fetches and displays a random movie from the database.
     """
@@ -128,7 +127,7 @@ def fetch_random_movie(movies: dict[str, float]):
     print(f"Random Movie: {random_movie[0]} with a rating of {random_movie[1]}")
 
 
-def search_movies(movies: dict[str, float]):
+def search_movies(movies: dict[str, float]) -> None:
     """
     Search for all movies that match the user input.
     """
@@ -150,37 +149,24 @@ def search_movies(movies: dict[str, float]):
         print(f"{movie}: {rating}")
 
 
-def sort_movies_by_rating(movies: dict[str, float]):
+def sort_movies_by_rating(movies: dict[str, float]) -> None:
     """
     Displays movies from highest to lowest rating.
     """
     print("\n" * 50)  # Clear the console
-    choice = input("Sort in ascending order (y/n): ")
-    descending: bool = True
-    if choice.lower() == "y":
-        descending = False
-    elif choice.lower() == "n":
-        descending = True
-    else:
-        print("Invalid input. Showing in descending order")
 
-    sorted_movies = sorted( 
-        movies.items(),
-        key=lambda item: item[1],
-        reverse=descending
-    )
+    sorted_movies = sorted(movies.items(), key=lambda item: item[1], reverse=True)
 
-    
     print("=" * 40)
     print(f"{len(movies)} movies found in the database.")
     print("List of Movies:")
     print("-" * 40)
-    
+
     for movie, rating in sorted_movies:
         print(f"{movie}: {rating}")
 
 
-def delete_movie(movies: dict[str, float]):
+def delete_movie(movies: dict[str, float]) -> None:
     """
     Deletes a movie from the database.
     """
@@ -194,7 +180,7 @@ def delete_movie(movies: dict[str, float]):
         print(f"{movie_name} does not exist in the database.")
 
 
-def run_menu(movies: dict[str, float]):
+def run_menu(movies: dict[str, float]) -> None:
     """
     Displays the main menu and handles user selections until the user exits.
     """
@@ -236,7 +222,7 @@ def run_menu(movies: dict[str, float]):
             print("Invalid choice. Please try again.")
 
 
-def main():
+def main() -> None:
     """
     Initializes the movie database and starts the main menu.
     """
