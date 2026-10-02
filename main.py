@@ -198,6 +198,7 @@ def run_menu(movies: dict[str, float]):
     """
     Displays the main menu and handles user selections until the user exits.
     """
+
     # Each menu item contains a display label and its associated function.
     # Exit has no function, so its value is None.
     menu_options: list[tuple[str, Callable | None]] = [
@@ -217,7 +218,7 @@ def run_menu(movies: dict[str, float]):
         for index, (label, function) in enumerate(menu_options, start=1):
             print(f"{index}. {label}")
 
-        choice = input(f"Enter your choice (1-{len(menu_options)}): ")
+        choice = input(f"\nEnter your choice (1-{len(menu_options)}): ")
         # Convert the user's menu choice to a 0-based list index.
         choice_index = int(choice) - 1 if choice.isdigit() else -1
 
@@ -225,6 +226,8 @@ def run_menu(movies: dict[str, float]):
             label, function = menu_options[choice_index]
             if function:
                 function(movies)
+                input("\nPress enter to continue...")
+                print("\n" * 50)  # Clear the console
             else:
                 # None indicates the Exit option was selected.
                 print("Exiting the application. Goodbye!")
