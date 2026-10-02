@@ -110,35 +110,45 @@ def delete_movie(movies: dict[str, float]):
 
 
 def run_menu(movies: dict[str, float]):
-    menu_options: dict[str, Callable] = {
-        "1": list_movies,
-        "2": add_movie,
-        "3": update_movie_rating,
-        "4": generate_analytics,
-        "5": delete_movie
-    }
+    """
+    Displays the main menu and handles user selections until the user exits.
+    """
+    # Each menu item contains a display label and its associated function.
+    # Exit has no function, so its value is None.
+    menu_options: list[tuple[str, Callable | None]] = [
+        ("View all movies", list_movies),
+        ("Add a new movie", add_movie),
+        ("Update a movie rating", update_movie_rating),
+        ("Show Statistics", generate_analytics),
+        ("Delete a movie", delete_movie),
+        ("Exit", None)
+    ]
 
     while True:
         print("\n" + "*" * 8 + " Axel's Movie Database " + "*" * 8)
-        print("1. View all movies")
-        print("2. Add a new movie")
-        print("3. Update a movie rating")
-        print("4. Show Statistics")
-        print("5. Delete a movie")
-        print("6. Exit")
+        for index, (label, function) in enumerate(menu_options, start=1):
+            print(f"{index}. {label}")
 
-        choice = input(f"Enter your choice (1-{len(menu_options) + 1}): ")
-
-        if choice in menu_options:
-            menu_options[choice](movies)
-        elif choice == "6":
-            print("Exiting the application.")
-            break
+        choice = input(f"Enter your choice (1-{len(menu_options)}): ")
+        # Convert the user's menu choice to a 0-based list index.
+        choice_index = int(choice) - 1 if choice.isdigit() else -1
+        
+        if 0 <= choice_index < len(menu_options):
+            label, function = menu_options[choice_index]
+            if function:
+                function(movies)
+            else:
+                # None indicates the Exit option was selected.
+                print("Exiting the application. Goodbye!")
+                break
         else:
             print("Invalid choice. Please try again.")
 
 
 def main():
+    """
+    Initializes the movie database and starts the main menu.
+    """
     # Dictionary to store the movies and the rating
     movies: dict[str, float] = {
         "The Shawshank Redemption": 9.5,
