@@ -6,7 +6,7 @@ to manage movies and their ratings and perform basic analytics.
 from collections.abc import Callable
 
 
-def list_movies(movies: dict):
+def list_movies(movies: dict[str, float]):
     """
     Lists all the movies in the database along with their ratings.
     """
@@ -20,7 +20,7 @@ def list_movies(movies: dict):
         print(f"{movie}: {rating}")
 
 
-def add_movie(movies: dict):
+def add_movie(movies: dict[str, float]):
     """
     Adds a new movie to the database with its rating.
     """
@@ -42,7 +42,7 @@ def add_movie(movies: dict):
         print("Invalid input. Please enter a numeric value for the rating.")
 
 
-def update_movie_rating(movies: dict):
+def update_movie_rating(movies: dict[str, float]):
     """
     Updates the rating of an existing movie in the database.
     """
@@ -64,7 +64,38 @@ def update_movie_rating(movies: dict):
         print("Invalid input. Please enter a numeric value for the rating.")
 
 
-def delete_movie(movies: dict):
+def generate_analytics(movies: dict[str, float]):
+    """
+    Generates and displays analytics about the movies in the database.
+    """
+    print("\n" * 50)  # Clear the console
+    if not movies:
+        print("No movies in the database to analyze.")
+        return
+
+    total_movies = len(movies)
+    average_rating = sum(movies.values()) / total_movies
+    highest_rating = max(movies.values())
+    highest_rated_movies = [movie for movie, rating in movies.items() if rating == highest_rating]
+    lowest_rating = min(movies.values())
+    lowest_rated_movies = [movie for movie, rating in movies.items() if rating == lowest_rating]
+
+    print("=" * 40)
+    print("Movie Analytics:")
+    print("-" * 40)
+    print(f"Total number of movies: {total_movies}")
+    print(f"Average rating: {average_rating:.2f}")
+    if len(highest_rated_movies) > 1:
+        print(f"Highest rated movies: {', '.join(highest_rated_movies)} ({highest_rating})")
+    else:
+        print(f"Highest rated movie: {highest_rated_movies[0]} ({highest_rating})")
+    if len(lowest_rated_movies) > 1:
+        print(f"Lowest rated movies: {', '.join(lowest_rated_movies)} ({lowest_rating})")
+    else:
+        print(f"Lowest rated movie: {lowest_rated_movies[0]} ({lowest_rating})")
+
+
+def delete_movie(movies: dict[str, float]):
     """
     Deletes a movie from the database.
     """
@@ -78,12 +109,13 @@ def delete_movie(movies: dict):
         print(f"{movie_name} does not exist in the database.")
 
 
-def run_menu(movies: dict):
+def run_menu(movies: dict[str, float]):
     menu_options: dict[str, Callable] = {
         "1": list_movies,
         "2": add_movie,
         "3": update_movie_rating,
-        "5": delete_movie,
+        "4": generate_analytics,
+        "5": delete_movie
     }
 
     while True:
@@ -91,9 +123,11 @@ def run_menu(movies: dict):
         print("1. View all movies")
         print("2. Add a new movie")
         print("3. Update a movie rating")
+        print("4. Show Statistics")
         print("5. Delete a movie")
+        print("6. Exit")
 
-        choice = input("Enter your choice (1-6): ")
+        choice = input(f"Enter your choice (1-{len(menu_options) + 1}): ")
 
         if choice in menu_options:
             menu_options[choice](movies)
@@ -106,7 +140,7 @@ def run_menu(movies: dict):
 
 def main():
     # Dictionary to store the movies and the rating
-    movies = {
+    movies: dict[str, float] = {
         "The Shawshank Redemption": 9.5,
         "Pulp Fiction": 8.8,
         "The Room": 3.6,
