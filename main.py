@@ -64,11 +64,26 @@ def update_movie_rating(movies: dict):
         print("Invalid input. Please enter a numeric value for the rating.")
 
 
+def delete_movie(movies: dict):
+    """
+    Deletes a movie from the database.
+    """
+    print("\n" * 50)  # Clear the console
+    movie_name = input("Enter the name of the movie to delete: ")
+    
+    if movie_name in movies:
+        del movies[movie_name]
+        print(f"{movie_name} has been deleted from the database.")
+    else:
+        print(f"{movie_name} does not exist in the database.")
+
+
 def run_menu(movies: dict):
     menu_options: dict[str, Callable] = {
         "1": list_movies,
         "2": add_movie,
         "3": update_movie_rating,
+        "5": delete_movie,
     }
 
     while True:
@@ -76,6 +91,7 @@ def run_menu(movies: dict):
         print("1. View all movies")
         print("2. Add a new movie")
         print("3. Update a movie rating")
+        print("5. Delete a movie")
 
         choice = input("Enter your choice (1-6): ")
 
