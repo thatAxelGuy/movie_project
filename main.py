@@ -4,6 +4,7 @@ to manage movies and their ratings and perform basic analytics.
 """
 
 import random
+import matplotlib.pyplot as plt
 from collections.abc import Callable
 
 
@@ -180,6 +181,26 @@ def delete_movie(movies: dict[str, float]) -> None:
         print(f"{movie_name} does not exist in the database.")
 
 
+def create_rating_histogram(movies: dict[str, float]) -> None:
+    """
+    Creates a histogram of movie ratings.
+    """
+    print("\n" * 50)  # Clear the console
+    if not movies:
+        print("No movies in the database to create a histogram.")
+        return
+
+    file_name = input("Enter a file name to save the rating histogram to: ")
+
+    if file_name == "":
+        print("File name cannot be empty.")
+        return
+
+    ratings = list(movies.values())
+
+    plt.hist(ratings)
+    plt.savefig(file_name)
+
 def run_menu(movies: dict[str, float]) -> None:
     """
     Displays the main menu and handles user selections until the user exits.
@@ -196,6 +217,7 @@ def run_menu(movies: dict[str, float]) -> None:
         ("Search movies", search_movies),
         ("Sort movies by rating", sort_movies_by_rating),
         ("Delete a movie", delete_movie),
+        ("Create a histogram", create_rating_histogram),
         ("Exit", None),
     ]
 
