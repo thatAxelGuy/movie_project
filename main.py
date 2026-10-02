@@ -3,19 +3,49 @@ A command-line movie database application that allows users
 to manage movies and their ratings and perform basic analytics.
 """
 
+from collections.abc import Callable
+
 
 def list_movies(movies: dict):
     """
     Lists all the movies in the database along with their ratings.
     """
-    print("\nList of Movies:")
+    print("\n" * 50)  # Clear the console
+    print("=" * 40)
+    print(f"{len(movies)} movies found in the database.")
+    print("List of Movies:")
+    print("-" * 40)
+    
     for movie, rating in movies.items():
         print(f"{movie}: {rating}")
 
 
+def add_movie(movies: dict):
+    """
+    Adds a new movie to the database with its rating.
+    """
+    print("\n" * 50)  # Clear the console
+    movie_name = input("Enter the name of the movie: ")
+    
+    if movie_name in movies:
+        print(f"{movie_name} already exists in the database.")
+        return
+
+    try:
+        rating = float(input("Enter the rating for the movie (0-10): "))
+        if 0 <= rating <= 10:
+            movies[movie_name] = rating
+            print(f"{movie_name} has been added with a rating of {rating}.")
+        else:
+            print("Rating must be between 0 and 10.")
+    except ValueError:
+        print("Invalid input. Please enter a numeric value for the rating.")
+
+
 def run_menu(movies: dict):
-    menu_options = {
+    menu_options: dict[str, Callable] = {
         "1": list_movies,
+        "2": add_movie
     }
 
     while True:
