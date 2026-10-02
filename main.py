@@ -42,15 +42,40 @@ def add_movie(movies: dict):
         print("Invalid input. Please enter a numeric value for the rating.")
 
 
+def update_movie_rating(movies: dict):
+    """
+    Updates the rating of an existing movie in the database.
+    """
+    print("\n" * 50)  # Clear the console
+    movie_name = input("Enter the name of the movie to update: ")
+    
+    if movie_name not in movies:
+        print(f"{movie_name} does not exist in the database.")
+        return
+
+    try:
+        new_rating = float(input("Enter the new rating for the movie (0-10): "))
+        if 0 <= new_rating <= 10:
+            movies[movie_name] = new_rating
+            print(f"The rating for {movie_name} has been updated to {new_rating}.")
+        else:
+            print("Rating must be between 0 and 10.")
+    except ValueError:
+        print("Invalid input. Please enter a numeric value for the rating.")
+
+
 def run_menu(movies: dict):
     menu_options: dict[str, Callable] = {
         "1": list_movies,
-        "2": add_movie
+        "2": add_movie,
+        "3": update_movie_rating,
     }
 
     while True:
         print("\n" + "*" * 8 + " Axel's Movie Database " + "*" * 8)
         print("1. View all movies")
+        print("2. Add a new movie")
+        print("3. Update a movie rating")
 
         choice = input("Enter your choice (1-6): ")
 
