@@ -2,7 +2,7 @@
 A command-line movie database application that allows users
 to manage movies and their ratings and perform basic analytics.
 """
-
+import random
 from collections.abc import Callable
 
 
@@ -73,12 +73,22 @@ def generate_analytics(movies: dict[str, float]):
         print("No movies in the database to analyze.")
         return
 
+
     total_movies = len(movies)
     average_rating = sum(movies.values()) / total_movies
     highest_rating = max(movies.values())
     highest_rated_movies = [movie for movie, rating in movies.items() if rating == highest_rating]
     lowest_rating = min(movies.values())
     lowest_rated_movies = [movie for movie, rating in movies.items() if rating == lowest_rating]
+
+    # Calculate the median rating
+    ratings = list(movies.values())
+    ratings.sort()
+    if len(ratings) % 2 == 0:
+        mid = len(ratings) // 2
+        median_rating = (ratings[mid - 1] + ratings[mid]) / 2
+    else:
+        median_rating = ratings[len(ratings) // 2]
 
     print("=" * 40)
     print("Movie Analytics:")
@@ -93,6 +103,20 @@ def generate_analytics(movies: dict[str, float]):
         print(f"Lowest rated movies: {', '.join(lowest_rated_movies)} ({lowest_rating})")
     else:
         print(f"Lowest rated movie: {lowest_rated_movies[0]} ({lowest_rating})")
+    print(f"Median rating: {median_rating:.2f}")
+
+def fetch_random_movie(movies: dict[str, float]):
+    """
+    Fetches and displays a random movie from the database.
+    """
+
+    print("\n" * 50)  # Clear the console
+    if not movies:
+        print("No movies in the database to fetch.")
+        return
+
+    random_movie = random.choice(list(movies.items()))
+    print(f"Random Movie: {random_movie[0]} with a rating of {random_movie[1]}")
 
 
 def delete_movie(movies: dict[str, float]):
@@ -120,6 +144,7 @@ def run_menu(movies: dict[str, float]):
         ("Add a new movie", add_movie),
         ("Update a movie rating", update_movie_rating),
         ("Show Statistics", generate_analytics),
+        ("Show a random movie", fetch_random_movie),
         ("Delete a movie", delete_movie),
         ("Exit", None)
     ]
