@@ -101,8 +101,10 @@ def generate_analytics(movies: dict[str, float]) -> None:
     print(f"Total number of movies: {total_movies}")
     print(f"Average rating: {average_rating:.2f}")
     if len(highest_rated_movies) > 1:
-        print(f"Highest rated movies: {
-                ', '.join(highest_rated_movies)} ({highest_rating})")
+        print(
+            f"Highest rated movies: {', '.join(highest_rated_movies)} "
+            f"({highest_rating})"
+        )
     else:
         print(f"Highest rated movie: {highest_rated_movies[0]} ({highest_rating})")
     if len(lowest_rated_movies) > 1:
@@ -128,21 +130,91 @@ def fetch_random_movie(movies: dict[str, float]) -> None:
     print(f"Random Movie: {random_movie[0]} with a rating of {random_movie[1]}")
 
 
-def search_movies(movies: dict[str, float]) -> None:
+def levenshtein_distance(word1: str, word2: str) -> int:
+    """ Calculates the Levenshtein distance between two words. 
+    The distance represents the minimum number of single-character
+    insertions, deletions, or substitutions needed to transform one word into the other.
+    
+    Returns: int: The minimum number of edits required.
     """
-    Search for all movies that match the user input.
+    # [0] * (len(word2) + 1) = number of columns in matrix
+    # range(len(word1) + 1) = number of rows in matrix
+    matrix = [[0] * (len(word2) + 1) for i in range(len(word1) + 1)]
+
+    for i in range(len(matrix[0])):
+        matrix[0][i] = i  # Initialize row 0
+
+    for j in range(len(matrix)):
+        matrix[j][0] = j  # Initialize column 0
+
+    for i in range(1, len(matrix)):
+        for j in range(1, len(matrix[0])):
+            if word1[i - 1] == word2[j - 1]:
+                matrix[i][j] = matrix[i - 1][j - 1]
+            else:
+                matrix[i][j] = min(
+                    (matrix[i - 1][j] + 1),  # delete
+                    (matrix[i][j - 1] + 1),  # insert
+                    (matrix[i - 1][j - 1] + 1),  # replace
+                )
+
+    return matrix[-1][-1]
+
+
+def search_movies(movies: dict[str, float]) -> None:
+    """Searches the movie database using an exact, partial, or fuzzy match.
+
+    Exact and partial matches are checked first. If no direct match is found,
+    the search uses Levenshtein distance to find movie titles containing words
+    that are sufficiently similar to the query words.
     """
     print("\n" * 50)  # Clear the console
     search_query = input("What movie are you looking for?: ")
     search_results = {}
 
     for movie, rating in movies.items():
+
+        # First, check for an exact or partial match.
+        # This handles searches such as "star wars" or "dark knight".
         if search_query.lower() in movie.lower():
             search_results[movie] = rating
+        else:
+            # If there is no direct match, try fuzzy matching.
+            # Split the movie title and search query into individual words.
+            title_words = movie.split()
+            query_words = search_query.split()
+
+            # Keep track of how many words found a close match
+            matches = 0
+
+            for query_word in query_words:
+
+                for title_word in title_words:
+                    # Remove punctuation from the ends of words so that
+                    # "Godfather:" can still match "Godfather".
+                    clean_word = title_word.strip(":")
+                    clean_query = query_word.strip(":")
+
+                    # Compare the two words using Levenshtein distance.
+                    # # A distance of 2 or less is considered a fuzzy match.
+                    distance = levenshtein_distance(
+                        clean_query.lower(), clean_word.lower()
+                    )
+
+                    if distance <= 2:
+                        matches += 1
+                        # Stop checking title words once this query word
+                        # has found a sufficiently similar match.
+                        break
+
+            # Only include the movie if every query word found a match.
+            if matches == len(query_words):
+                search_results[movie] = rating
 
     print("\n" * 50)  # Clear the console
     print("=" * 40)
-    print(f"{len(search_results)} movies found in the database.")
+    print(f"You searched for {search_query}")
+    print(f"{len(search_results)} movies found for your search.")
     print("List of Movies:")
     print("-" * 40)
 
@@ -200,6 +272,7 @@ def create_rating_histogram(movies: dict[str, float]) -> None:
 
     plt.hist(ratings)
     plt.savefig(file_name)
+
 
 def run_menu(movies: dict[str, float]) -> None:
     """

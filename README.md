@@ -1,6 +1,6 @@
 # Python Movie CLI
 
-A command-line movie database application built with Python. It allows you to manage movies and ratings, perform basic analytics, search and sort movies, and generate a histogram of movie ratings.
+A command-line movie database application built with Python. It allows you to manage movies and ratings, perform basic analytics, search and sort movies, generate a histogram of movie ratings, and find movies using fuzzy search.
 
 ## Features
 
@@ -9,6 +9,9 @@ A command-line movie database application built with Python. It allows you to ma
 * Update a movie's rating
 * Delete a movie
 * Search for movies
+
+  * Exact and partial matching
+  * Fuzzy matching using Levenshtein distance
 * Display movie statistics:
 
   * Average rating
@@ -49,13 +52,13 @@ Choose **one** of the setup methods above.
 Using `uv`:
 
 ```bash
-uv run python movies.py
+uv run python main.py
 ```
 
 Or using Python directly after installing the dependencies:
 
 ```bash
-python movies.py
+python main.py
 ```
 
 ## Project Structure
@@ -68,3 +71,22 @@ python movies.py
 ├── uv.lock
 └── pyproject.toml
 ```
+
+## Fuzzy Search
+
+The application uses Levenshtein distance to find movies when the search query contains spelling mistakes.
+
+For example, a search such as:
+
+```text
+Gofather
+```
+
+can find movies containing a similar word such as:
+
+```text
+The Godfather
+The Godfather: Part II
+```
+
+The fuzzy search compares individual words in the query with words in each movie title and uses an edit-distance threshold to determine whether words are similar enough to match.
