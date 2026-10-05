@@ -5,6 +5,7 @@ description = "A command-line movie database application that allows users to ma
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "colorama>=0.4.6",
     "matplotlib>=3.11.2",
 ]
 
