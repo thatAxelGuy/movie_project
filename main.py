@@ -103,21 +103,23 @@ def generate_analytics(movies: dict[str, float]) -> None:
     print(menu("Average rating: ") + rating_formatted(f"{average_rating:.2f}"))
     if len(highest_rated_movies) > 1:
         print(
-            menu(f"Highest rated movies: {', '.join(highest_rated_movies)} ") 
+            menu(f"Highest rated movies: {', '.join(highest_rated_movies)} ")
             + rating_formatted(highest_rating)
         )
     else:
-        print(menu(f"Highest rated movie: {highest_rated_movies[0]}") 
-              + rating_formatted(f" {highest_rating}"))
+        print(
+            menu(f"Highest rated movie: {highest_rated_movies[0]}")
+            + rating_formatted(f" {highest_rating}")
+        )
     if len(lowest_rated_movies) > 1:
         print(
-            menu(f"Lowest rated movies: {', '.join(lowest_rated_movies)}" )
+            menu(f"Lowest rated movies: {', '.join(lowest_rated_movies)}")
             + rating_formatted(f" {lowest_rating}")
         )
     else:
         print(
-            menu(f"Lowest rated movie: {lowest_rated_movies[0]}") 
-            + rating_formatted( f" {lowest_rating}")
+            menu(f"Lowest rated movie: {lowest_rated_movies[0]}")
+            + rating_formatted(f" {lowest_rating}")
         )
     print(menu("Median rating: " + rating_formatted(f" {median_rating:.2f}")))
 
@@ -137,10 +139,10 @@ def fetch_random_movie(movies: dict[str, float]) -> None:
 
 
 def levenshtein_distance(word1: str, word2: str) -> int:
-    """ Calculates the Levenshtein distance between two words. 
+    """Calculates the Levenshtein distance between two words.
     The distance represents the minimum number of single-character
     insertions, deletions, or substitutions needed to transform one word into the other.
-    
+
     Returns: int: The minimum number of edits required.
     """
     # [0] * (len(word2) + 1) = number of columns in matrix
@@ -306,8 +308,13 @@ def run_menu(movies: dict[str, float]) -> None:
             print(f"{index}. {label}")
 
         choice = input(
-            menu("\nEnter your choice " 
-                 + "(" + info(f"1-{len(menu_options)}")  + menu("):")))
+            menu(
+                "\nEnter your choice "
+                + "("
+                + info(f"1-{len(menu_options)}")
+                + menu("):")
+            )
+        )
         # Convert the user's menu choice to a 0-based list index.
         choice_index = int(choice) - 1 if choice.isdigit() else -1
 
