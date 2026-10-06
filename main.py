@@ -4,6 +4,7 @@ to manage movies and their ratings and perform basic analytics.
 """
 
 import random
+import matplotlib.pyplot as plt
 from collections.abc import Callable
 from colors import (
     error,
@@ -14,7 +15,6 @@ from colors import (
     rating_formatted,
     bold,
     Fore,
-    Style,
 )
 from database import load_movies, save_movies
 from datetime import date
@@ -355,39 +355,81 @@ def sort_movies_by_rating(movies: dict[int, Movie]) -> None:
         )
 
 
-# def delete_movie(movies: dict[str, float]) -> None:
-#     """
-#     Deletes a movie from the database.
-#     """
-#     print("\n" * 50)  # Clear the console
-#     movie_name = input("Enter the name of the movie to delete: ")
+def delete_movie(movies: dict[int, Movie]) -> None:
+    """
+    Deletes a movie from the database.
+    """
+    print("\n" * 50)  # Clear the console
+    list_movies(movies)
+    try:
+        movie_id = int(input("Enter the ID of the movie you want to delete: "))
 
-#     if movie_name in movies:
-#         del movies[movie_name]
-#         print(f"{movie_name} has been deleted from the database.")
-#     else:
-#         print(f"{movie_name} does not exist in the database.")
+        if movie_id not in movies:
+            print(
+                error("Movie with ID ")
+                + bold(str(movie_id))
+                + error(" does not exist.")
+            )
+            return
+
+        movie = movies[movie_id]
+
+        print(
+            menu("Movie to delete: ")
+            + bold(movie["title"])
+            + f" ({movie['year']}), "
+            + menu("Rating: ")
+            + f"({rating_formatted(movie['rating'])}/10)"
+        )
+
+        confirmation = input(
+            warning("Are you sure you want to delete this movie? (y/n): ")
+        )
+
+        if confirmation.lower() != "y":
+            print(error("Movie deletion cancelled!"))
+            return
+
+        del movies[movie_id]
+
+        save_movies(MOVIES_FILE, movies)
+
+        print(success("Movie deleted: ") + bold(movie["title"]) + f" ({movie['year']})")
+
+    except ValueError:
+        print("Invalid input. Please enter a valid movie ID.")
 
 
-# def create_rating_histogram(movies: dict[str, float]) -> None:
-#     """
-#     Creates a histogram of movie ratings.
-#     """
-#     print("\n" * 50)  # Clear the console
-#     if not movies:
-#         print("No movies in the database to create a histogram.")
-#         return
+def create_rating_histogram(movies: dict[int, Movie]) -> None:
+    """
+    Creates a histogram of movie ratings.
+    """
+    print("\n" * 50)  # Clear the console
+    if not movies:
+        print("No movies in the database to create a histogram.")
+        return
 
-#     file_name = input("Enter a file name to save the rating histogram to: ")
+    allowed_extensions = (".png", ".jpg", ".jpeg")
 
-#     if file_name == "":
-#         print("File name cannot be empty.")
-#         return
+    file_name = input("Enter a file name for the histogram(.png): ")
 
-#     ratings = list(movies.values())
+    if file_name == "":
+        print("File name cannot be empty.")
+        return
+    
+    if not file_name.lower().endswith(allowed_extensions):
+        file_name += ".png"
 
-#     plt.hist(ratings)
-#     plt.savefig(file_name)
+    ratings = [movie["rating"] for movie in movies.values()]
+
+    plt.hist(ratings)
+    plt.xlabel("Rating")
+    plt.ylabel("Number of Movies")
+    plt.title("Movie Ratings")
+    plt.savefig(file_name)
+    plt.close()
+
+    print(f"Rating histogram saved to {file_name}.")
 
 
 def run_menu(movies: dict[int, Movie]) -> None:
@@ -405,9 +447,9 @@ def run_menu(movies: dict[int, Movie]) -> None:
         ("Show Statistics", generate_analytics),
         ("Show a random movie", fetch_random_movie),
         ("Search movies", search_movies),
-        # ("Create a histogram", create_rating_histogram),
+        ("Create a histogram", create_rating_histogram),
         ("Sort movies by rating", sort_movies_by_rating),
-        # (error("Delete a movie"), delete_movie),
+        (error("Delete a movie"), delete_movie),
     ]
 
     while True:
@@ -446,6 +488,7 @@ def main() -> None:
     """
     movies: dict[int, Movie] = load_movies(MOVIES_FILE)
     run_menu(movies)
+
 
 if __name__ == "__main__":
     main()
