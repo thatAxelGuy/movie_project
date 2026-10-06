@@ -15,12 +15,15 @@ def info(text) -> str:
 def menu(text) -> str:
     return f"{Fore.BLUE}{text}{Style.RESET_ALL}"
 
-def rating_formatted(text) -> str:
-    as_float = float(text)
+def rating_formatted(rating: float) -> str:
+    if rating >= 9:
+        return f"{Fore.LIGHTGREEN_EX}{rating:.1f}{Style.RESET_ALL}"
 
-    if as_float >= 9:
-        return f"{Fore.LIGHTGREEN_EX}{text}{Style.RESET_ALL}"
-    elif as_float >= 5:
-        return f"{Fore.YELLOW}{text}{Style.RESET_ALL}"
+    elif rating >= 5:
+        return f"{Fore.YELLOW}{rating:.1f}{Style.RESET_ALL}"
+
     else:
-        return f"{Fore.LIGHTRED_EX}{text}{Style.RESET_ALL}"
+        return f"{Fore.LIGHTRED_EX}{rating:.1f}{Style.RESET_ALL}"
+
+def bold(text: str) -> str:
+    return f"\033[1m{text}\033[0m"

@@ -2,9 +2,20 @@
 A command-line movie database application that allows users
 to manage movies and their ratings and perform basic analytics.
 """
+
 import random
 from collections.abc import Callable
-from colors import error, success, warning, info, menu, rating_formatted
+from colors import (
+    error,
+    success,
+    warning,
+    info,
+    menu,
+    rating_formatted,
+    bold,
+    Fore,
+    Style,
+)
 from database import load_movies, save_movies
 from datetime import date
 from models import Movie
@@ -12,7 +23,7 @@ from models import Movie
 MOVIES_FILE = "movies.json"
 
 
-def list_movies(movies: dict[str, Movie]) -> None:
+def list_movies(movies: dict[int, Movie]) -> None:
     """
     Lists all the movies in the database along with their ratings.
     """
@@ -24,9 +35,13 @@ def list_movies(movies: dict[str, Movie]) -> None:
 
     for movie_id, movie in movies.items():
         print(
-            f"{movie['title']} "
-            + f"({movie['year']}): "
-            + rating_formatted(str(movie["rating"]))
+            menu("ID: ")
+            + f"{movie_id}. "
+            + menu("Title: ")
+            + bold(movie["title"])
+            + f" ({movie['year']}), "
+            + menu("Rating: ")
+            + f"({rating_formatted(movie['rating'])}/10)"
         )
 
 
@@ -50,7 +65,7 @@ def add_movie(movies: dict[int, Movie]) -> None:
             movie["title"].lower() == title.lower() and movie["year"] == year
             for movie in movies.values()
         ):
-            print(f"{title} already exists in the database.")
+            print(f"{title} ({year}) already exists in the database.")
             return
 
         rating = float(input("Enter the rating for the movie (0-10): "))
@@ -68,7 +83,13 @@ def add_movie(movies: dict[int, Movie]) -> None:
         }
 
         save_movies(MOVIES_FILE, movies)
-        print(f"{title} has been added with a rating of {rating}")
+        print(
+            success("Movie added: ")
+            + bold(title)
+            + f" ({year}), "
+            + menu("Rating: ")
+            + f"({rating_formatted(rating)}/10)"
+        )
 
     except ValueError:
         print("Invalid input. Please enter valid numeric values.")
@@ -79,32 +100,42 @@ def update_movie_rating(movies: dict[int, Movie]) -> None:
     Updates the rating of an existing movie in the database.
     """
     print("\n" * 50)  # Clear the console
-    title = input("Enter the name of the movie to update: ")
-    
-    movie_id = next(
-        (
-            movie_id
-            for movie_id, movie in movies.items()
-            if movie['title'].lower() == title.lower()
-        ),
-        None
-    )
-    
-    if not movie_id:
-        print(f"{title} does not exist in the database.")
-        return
+
+    list_movies(movies)
 
     try:
+        movie_id = int(input("\nEnter the ID of the movie to update: "))
+
+        if movie_id not in movies:
+            print(f"Movie with ID {movie_id} does not exist.")
+            return
+
+        movie = movies[movie_id]
+
+        print(
+            menu("Selected movie: ")
+            + bold(movie["title"])
+            + f" ({movie['year']}), "
+            + menu("Current rating: ")
+            + f"({rating_formatted(movie['rating'])}/10)"
+        )
+
         new_rating = float(input("Enter the new rating for the movie (0-10): "))
-        if 0 <= new_rating <= 10:
-            movies[movie_id]['rating'] = new_rating
-            print(f"The rating for {title} with ID {movie_id} "
-                  f"has been updated to {new_rating}.")
-            save_movies(MOVIES_FILE, movies)
-        else:
+
+        if not 0 <= new_rating <= 10:
             print("Rating must be between 0 and 10.")
+            return
+
+        movie["rating"] = new_rating
+        save_movies(MOVIES_FILE, movies)
+
+        print(
+            f"The rating for {movie['title']} "
+            f"has been updated to {rating_formatted(new_rating)}."
+        )
+
     except ValueError:
-        print("Invalid input. Please enter a numeric value for the rating.")
+        print("Invalid input. Please enter a valid ID and rating.")
 
 
 def generate_analytics(movies: dict[int, Movie]) -> None:
@@ -116,21 +147,17 @@ def generate_analytics(movies: dict[int, Movie]) -> None:
         print("No movies in the database to analyze.")
         return
 
-    ratings = [movie['rating'] for movie in movies.values()]
+    ratings = [movie["rating"] for movie in movies.values()]
 
     total_movies = len(movies)
     average_rating = sum(ratings) / total_movies
     highest_rating = max(ratings)
     highest_rated_movies = [
-        movie['title'] 
-        for movie in movies.values()
-        if movie['rating'] == highest_rating
+        movie["title"] for movie in movies.values() if movie["rating"] == highest_rating
     ]
     lowest_rating = min(ratings)
     lowest_rated_movies = [
-        movie['title']
-        for movie in movies.values() 
-        if movie['rating'] == lowest_rating
+        movie["title"] for movie in movies.values() if movie["rating"] == lowest_rating
     ]
 
     # Calculate the median rating
@@ -145,7 +172,7 @@ def generate_analytics(movies: dict[int, Movie]) -> None:
     print(menu("Movie Analytics:"))
     print("-" * 40)
     print(menu("Total number of movies: " + info(f"{total_movies}")))
-    print(menu("Average rating: ") + rating_formatted(f"{average_rating:.2f}"))
+    print(menu("Average rating: ") + rating_formatted(average_rating))
     if len(highest_rated_movies) > 1:
         print(
             menu(f"Highest rated movies: {', '.join(highest_rated_movies)} ")
@@ -153,20 +180,26 @@ def generate_analytics(movies: dict[int, Movie]) -> None:
         )
     else:
         print(
-            menu(f"Highest rated movie: {highest_rated_movies[0]}")
-            + rating_formatted(f" {highest_rating}")
+            menu("Highest rated movie: ")
+            + Fore.WHITE
+            + bold(highest_rated_movies[0])
+            + " "
+            + rating_formatted(highest_rating)
         )
     if len(lowest_rated_movies) > 1:
         print(
             menu(f"Lowest rated movies: {', '.join(lowest_rated_movies)}")
-            + rating_formatted(f" {lowest_rating}")
+            + rating_formatted(lowest_rating)
         )
     else:
         print(
-            menu(f"Lowest rated movie: {lowest_rated_movies[0]}")
-            + rating_formatted(f" {lowest_rating}")
+            menu("Lowest rated movie: ")
+            + Fore.WHITE
+            + bold(lowest_rated_movies[0])
+            + " "
+            + rating_formatted(lowest_rating)
         )
-    print(menu("Median rating: " + rating_formatted(f" {median_rating:.2f}")))
+    print(menu("Median rating: " + rating_formatted(median_rating)))
 
 
 def fetch_random_movie(movies: dict[int, Movie]) -> None:
@@ -262,7 +295,7 @@ def search_movies(movies: dict[int, Movie]) -> None:
                     distance = levenshtein_distance(
                         clean_query.lower(), clean_word.lower()
                     )
-                    
+
                     # A distance of 2 or less is considered a fuzzy match.
                     if distance <= 2:
                         matches += 1
@@ -282,7 +315,7 @@ def search_movies(movies: dict[int, Movie]) -> None:
     if not search_results:
         print("No movies found.")
         return
-    
+
     for movie_id, movie in search_results.items():
         print(
             f"{movie_id}. {movie['title']} "
@@ -291,21 +324,35 @@ def search_movies(movies: dict[int, Movie]) -> None:
         )
 
 
-# def sort_movies_by_rating(movies: dict[str, float]) -> None:
-#     """
-#     Displays movies from highest to lowest rating.
-#     """
-#     print("\n" * 50)  # Clear the console
+def sort_movies_by_rating(movies: dict[int, Movie]) -> None:
+    """
+    Displays movies from highest to lowest rating.
+    """
+    print("\n" * 50)  # Clear the console
 
-#     sorted_movies = sorted(movies.items(), key=lambda item: item[1], reverse=True)
+    sorted_movies = sorted(
+        movies.items(), key=lambda item: item[1]["rating"], reverse=True
+    )
 
-#     print("=" * 40)
-#     print(f"{len(movies)} movies found in the database.")
-#     print("List of Movies:")
-#     print("-" * 40)
+    print("=" * 40)
+    print(f"{len(movies)} movies found in the database.")
+    print("List of Movies:")
+    print("-" * 40)
 
-#     for movie, rating in sorted_movies:
-#         print(f"{movie}: {rating}")
+    for movie_id, movie in sorted_movies:
+        title = movie["title"]
+        year = movie["year"]
+        rating = rating_formatted(movie["rating"])
+
+        print(
+            menu("ID: ")
+            + f"{movie_id}. "
+            + menu("Title: ")
+            + bold(title)
+            + f" ({year}), "
+            + menu("Rating: ")
+            + f"({rating}/10)"
+        )
 
 
 # def delete_movie(movies: dict[str, float]) -> None:
@@ -359,7 +406,7 @@ def run_menu(movies: dict[int, Movie]) -> None:
         ("Show a random movie", fetch_random_movie),
         ("Search movies", search_movies),
         # ("Create a histogram", create_rating_histogram),
-        # ("Sort movies by rating", sort_movies_by_rating),
+        ("Sort movies by rating", sort_movies_by_rating),
         # (error("Delete a movie"), delete_movie),
     ]
 
@@ -378,7 +425,6 @@ def run_menu(movies: dict[int, Movie]) -> None:
         )
         # Convert the user's menu choice to a 0-based list index.
         choice_index = int(choice) if choice.isdigit() else -1
-        print(choice_index)
 
         if 0 <= choice_index < len(menu_options):
             label, function = menu_options[choice_index]
@@ -399,12 +445,7 @@ def main() -> None:
     Initializes the movie database and starts the main menu.
     """
     movies: dict[int, Movie] = load_movies(MOVIES_FILE)
-
-    if len(movies) > 0:
-        run_menu(movies)
-    else:
-        print(error("No movies found."))
-
+    run_menu(movies)
 
 if __name__ == "__main__":
     main()
