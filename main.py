@@ -3,12 +3,13 @@ A command-line movie database application that allows users
 to manage movies and their ratings and perform basic analytics.
 """
 
-import random
-import matplotlib.pyplot as plt
 from collections.abc import Callable
 from colors import error, success, warning, info, menu, rating_formatted
-from database import load_movies
+from database import load_movies, save_movies
+from datetime import date
 from models import Movie
+
+MOVIES_FILE = "movies.json"
 
 
 def list_movies(movies: dict[str, Movie]) -> None:
@@ -23,32 +24,54 @@ def list_movies(movies: dict[str, Movie]) -> None:
 
     for movie_id, movie in movies.items():
         print(
-            f"{movie['title']} " +
-            f"({movie['year']}): "
-            + rating_formatted(str(movie['rating']))
+            f"{movie['title']} "
+            + f"({movie['year']}): "
+            + rating_formatted(str(movie["rating"]))
         )
 
 
-# def add_movie(movies: dict[str, float]) -> None:
-#     """
-#     Adds a new movie to the database with its rating.
-#     """
-#     print("\n" * 50)  # Clear the console
-#     movie_name = input("Enter the name of the movie: ")
+def add_movie(movies: dict[int, Movie]) -> None:
+    """
+    Adds a new movie to the database with its rating.
+    """
+    print("\n" * 50)  # Clear the console
+    title = input("Enter the name of the movie: ")
 
-#     if movie_name in movies:
-#         print(f"{movie_name} already exists in the database.")
-#         return
+    try:
+        year = int(input("Enter the year (YYYY) the movie was released: "))
 
-#     try:
-#         rating = float(input("Enter the rating for the movie (0-10): "))
-#         if 0 <= rating <= 10:
-#             movies[movie_name] = rating
-#             print(f"{movie_name} has been added with a rating of {rating}.")
-#         else:
-#             print("Rating must be between 0 and 10.")
-#     except ValueError:
-#         print("Invalid input. Please enter a numeric value for the rating.")
+        current_year = date.today().year
+        if not 1888 <= year <= current_year:
+            print("Invalid year.")
+            return
+        
+        # Check whether movie with the same title already exists in database
+        if any(
+            movie["title"].lower() == title and movie["year"] == year
+            for movie in movies.values()
+        ):
+            print(f"{title} already exists in the database.")
+            return
+
+        rating = float(input("Enter the rating for the movie (0-10): "))
+
+        if not 0 <= rating <= 10:
+            print("Rating must be between 0 and 10.")
+            return
+
+        movie_id = max(movies, default=0) + 1
+
+        movies[movie_id] = {
+            "title": title,
+            "rating": rating,
+            "year": year,
+        }
+
+        save_movies(MOVIES_FILE, movies)
+        print(f"{title} has been added with a rating of {rating}")
+
+    except ValueError:
+        print("Invalid input. Please enter valid numeric values.")
 
 
 # def update_movie_rating(movies: dict[str, float]) -> None:
@@ -298,7 +321,7 @@ def run_menu(movies: dict[int, Movie]) -> None:
     menu_options: list[tuple[str, Callable | None]] = [
         (warning("Exit"), None),
         ("View all movies", list_movies),
-        # ("Add a new movie", add_movie),
+        ("Add a new movie", add_movie),
         # ("Update a movie rating", update_movie_rating),
         # ("Show Statistics", generate_analytics),
         # ("Show a random movie", fetch_random_movie),
@@ -343,7 +366,7 @@ def main() -> None:
     """
     Initializes the movie database and starts the main menu.
     """
-    movies: dict[int, Movie] = load_movies("movies.json")
+    movies: dict[int, Movie] = load_movies(MOVIES_FILE)
 
     if len(movies) > 0:
         run_menu(movies)
