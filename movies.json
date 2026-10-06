@@ -1,0 +1,52 @@
+{
+    "1": {
+        "title": "The Shawshank Redemption",
+        "rating": 9.5,
+        "year": 1994
+    },
+    "2": {
+        "title": "Pulp Fiction",
+        "rating": 8.8,
+        "year": 1994
+    },
+    "3": {
+        "title": "The Room",
+        "rating": 3.6,
+        "year": 2003
+    },
+    "4": {
+        "title": "The Godfather",
+        "rating": 9.2,
+        "year": 1972
+    },
+    "5": {
+        "title": "The Godfather: Part II",
+        "rating": 9.0,
+        "year": 1974
+    },
+    "6": {
+        "title": "The Dark Knight",
+        "rating": 9.0,
+        "year": 2008
+    },
+    "7": {
+        "title": "12 Angry Men",
+        "rating": 8.9,
+        "year": 1957
+    },
+    "8": {
+        "title": "Everything Everywhere All At Once",
+        "rating": 8.9,
+        "year": 2022
+    },
+    "9": {
+        "title": "Forrest Gump",
+        "rating": 8.8,
+        "year": 1994
+    },
+    "10": {
+        "title": "Star Wars: Episode V",
+        "rating": 8.7,
+        "year": 1980
+    }
+}
