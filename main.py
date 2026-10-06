@@ -44,10 +44,10 @@ def add_movie(movies: dict[int, Movie]) -> None:
         if not 1888 <= year <= current_year:
             print("Invalid year.")
             return
-        
+
         # Check whether movie with the same title already exists in database
         if any(
-            movie["title"].lower() == title and movie["year"] == year
+            movie["title"].lower() == title.lower() and movie["year"] == year
             for movie in movies.values()
         ):
             print(f"{title} already exists in the database.")
@@ -74,26 +74,37 @@ def add_movie(movies: dict[int, Movie]) -> None:
         print("Invalid input. Please enter valid numeric values.")
 
 
-# def update_movie_rating(movies: dict[str, float]) -> None:
-#     """
-#     Updates the rating of an existing movie in the database.
-#     """
-#     print("\n" * 50)  # Clear the console
-#     movie_name = input("Enter the name of the movie to update: ")
+def update_movie_rating(movies: dict[int, Movie]) -> None:
+    """
+    Updates the rating of an existing movie in the database.
+    """
+    print("\n" * 50)  # Clear the console
+    title = input("Enter the name of the movie to update: ")
+    
+    movie_id = next(
+        (
+            movie_id
+            for movie_id, movie in movies.items()
+            if movie['title'].lower() == title.lower()
+        ),
+        None
+    )
+    
+    if not movie_id:
+        print(f"{title} does not exist in the database.")
+        return
 
-#     if movie_name not in movies:
-#         print(f"{movie_name} does not exist in the database.")
-#         return
-
-#     try:
-#         new_rating = float(input("Enter the new rating for the movie (0-10): "))
-#         if 0 <= new_rating <= 10:
-#             movies[movie_name] = new_rating
-#             print(f"The rating for {movie_name} has been updated to {new_rating}.")
-#         else:
-#             print("Rating must be between 0 and 10.")
-#     except ValueError:
-#         print("Invalid input. Please enter a numeric value for the rating.")
+    try:
+        new_rating = float(input("Enter the new rating for the movie (0-10): "))
+        if 0 <= new_rating <= 10:
+            movies[movie_id]['rating'] = new_rating
+            print(f"The rating for {title} with ID {movie_id} "
+                  f"has been updated to {new_rating}.")
+            save_movies(MOVIES_FILE, movies)
+        else:
+            print("Rating must be between 0 and 10.")
+    except ValueError:
+        print("Invalid input. Please enter a numeric value for the rating.")
 
 
 # def generate_analytics(movies: dict[str, float]) -> None:
@@ -322,7 +333,7 @@ def run_menu(movies: dict[int, Movie]) -> None:
         (warning("Exit"), None),
         ("View all movies", list_movies),
         ("Add a new movie", add_movie),
-        # ("Update a movie rating", update_movie_rating),
+        ("Update a movie rating", update_movie_rating),
         # ("Show Statistics", generate_analytics),
         # ("Show a random movie", fetch_random_movie),
         # ("Search movies", search_movies),
