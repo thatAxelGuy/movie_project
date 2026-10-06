@@ -290,6 +290,7 @@ def run_menu(movies: dict[str, float]) -> None:
     # Each menu item contains a display label and its associated function.
     # Exit has no function, so its value is None.
     menu_options: list[tuple[str, Callable | None]] = [
+        (warning("Exit"), None),
         ("View all movies", list_movies),
         ("Add a new movie", add_movie),
         ("Update a movie rating", update_movie_rating),
@@ -299,24 +300,24 @@ def run_menu(movies: dict[str, float]) -> None:
         ("Create a histogram", create_rating_histogram),
         ("Sort movies by rating", sort_movies_by_rating),
         (error("Delete a movie"), delete_movie),
-        (warning("Exit"), None),
     ]
 
     while True:
         print(menu("\n" + "*" * 8 + " Axel's Movie Database " + "*" * 8))
-        for index, (label, function) in enumerate(menu_options, start=1):
+        for index, (label, function) in enumerate(menu_options, start=0):
             print(f"{index}. {label}")
 
         choice = input(
             menu(
                 "\nEnter your choice "
                 + "("
-                + info(f"1-{len(menu_options)}")
+                + info(f"0-{len(menu_options)-1}")
                 + menu("):")
             )
         )
         # Convert the user's menu choice to a 0-based list index.
-        choice_index = int(choice) - 1 if choice.isdigit() else -1
+        choice_index = int(choice) if choice.isdigit() else -1
+        print(choice_index)
 
         if 0 <= choice_index < len(menu_options):
             label, function = menu_options[choice_index]
@@ -329,7 +330,7 @@ def run_menu(movies: dict[str, float]) -> None:
                 print(warning("Exiting the application. Goodbye!"))
                 break
         else:
-            print("Invalid choice. Please try again.")
+            print(error("Invalid choice. Please try again."))
 
 
 def main() -> None:
