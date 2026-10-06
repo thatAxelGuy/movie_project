@@ -221,7 +221,7 @@ def levenshtein_distance(word1: str, word2: str) -> int:
     return matrix[-1][-1]
 
 
-def search_movies(movies: dict[str, float]) -> None:
+def search_movies(movies: dict[int, Movie]) -> None:
     """Searches the movie database using an exact, partial, or fuzzy match.
 
     Exact and partial matches are checked first. If no direct match is found,
@@ -230,18 +230,22 @@ def search_movies(movies: dict[str, float]) -> None:
     """
     print("\n" * 50)  # Clear the console
     search_query = input("What movie are you looking for?: ")
-    search_results = {}
 
-    for movie, rating in movies.items():
+    if not search_query:
+        print("Please enter a movie title to search for.")
+        return
+
+    search_results: dict[int, Movie] = {}
+
+    for movie_id, movie in movies.items():
+        title = movie["title"]
 
         # First, check for an exact or partial match.
-        # This handles searches such as "star wars" or "dark knight".
-        if search_query.lower() in movie.lower():
-            search_results[movie] = rating
+        if search_query.lower() in title.lower():
+            search_results[movie_id] = movie
         else:
             # If there is no direct match, try fuzzy matching.
-            # Split the movie title and search query into individual words.
-            title_words = movie.split()
+            title_words = title.split()
             query_words = search_query.split()
 
             # Keep track of how many words found a close match
@@ -250,26 +254,23 @@ def search_movies(movies: dict[str, float]) -> None:
             for query_word in query_words:
 
                 for title_word in title_words:
-                    # Remove punctuation from the ends of words so that
-                    # "Godfather:" can still match "Godfather".
-                    clean_word = title_word.strip(":")
-                    clean_query = query_word.strip(":")
+                    # Remove punctuation from the ends of words
+                    clean_word = title_word.strip(":,!?")
+                    clean_query = query_word.strip(":,!?")
 
                     # Compare the two words using Levenshtein distance.
-                    # # A distance of 2 or less is considered a fuzzy match.
                     distance = levenshtein_distance(
                         clean_query.lower(), clean_word.lower()
                     )
-
+                    
+                    # A distance of 2 or less is considered a fuzzy match.
                     if distance <= 2:
                         matches += 1
-                        # Stop checking title words once this query word
-                        # has found a sufficiently similar match.
                         break
 
             # Only include the movie if every query word found a match.
             if matches == len(query_words):
-                search_results[movie] = rating
+                search_results[movie_id] = movie
 
     print("\n" * 50)  # Clear the console
     print("=" * 40)
@@ -278,8 +279,16 @@ def search_movies(movies: dict[str, float]) -> None:
     print("List of Movies:")
     print("-" * 40)
 
-    for movie, rating in search_results.items():
-        print(f"{movie}: {rating}")
+    if not search_results:
+        print("No movies found.")
+        return
+    
+    for movie_id, movie in search_results.items():
+        print(
+            f"{movie_id}. {movie['title']} "
+            f"({movie['year']}): "
+            f"{rating_formatted(movie['rating'])}"
+        )
 
 
 # def sort_movies_by_rating(movies: dict[str, float]) -> None:
@@ -348,7 +357,7 @@ def run_menu(movies: dict[int, Movie]) -> None:
         ("Update a movie rating", update_movie_rating),
         ("Show Statistics", generate_analytics),
         ("Show a random movie", fetch_random_movie),
-        # ("Search movies", search_movies),
+        ("Search movies", search_movies),
         # ("Create a histogram", create_rating_histogram),
         # ("Sort movies by rating", sort_movies_by_rating),
         # (error("Delete a movie"), delete_movie),
