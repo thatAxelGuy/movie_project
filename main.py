@@ -308,7 +308,7 @@ def search_movies(movies: dict[int, Movie]) -> None:
     print("\n" * 50)  # Clear the console
     print("=" * 40)
     print(f"You searched for {search_query}")
-    print(f"success({len(search_results)}movies) found for your search.")
+    print(success(f"{len(search_results)}") + " movies found for your search.")
     print("List of Movies:")
     print("-" * 40)
 
@@ -318,9 +318,13 @@ def search_movies(movies: dict[int, Movie]) -> None:
 
     for movie_id, movie in search_results.items():
         print(
-            f"{movie_id}. {movie['title']} "
-            f"({movie['year']}): "
-            f"{rating_formatted(movie['rating'])}"
+            menu("ID: ")
+            + f"{movie_id}. "
+            + menu("Title: ")
+            + bold(movie["title"])
+            + f" ({movie['year']}), "
+            + menu("Rating: ")
+            + f"({rating_formatted(movie['rating'])}/10)"
         )
 
 
@@ -411,12 +415,12 @@ def create_rating_histogram(movies: dict[int, Movie]) -> None:
 
     allowed_extensions = (".png", ".jpg", ".jpeg")
 
-    file_name = input("Enter a file name for the histogram(.png): ")
+    file_name = input("Enter a file name for the histogram(.png): ").strip()
 
-    if file_name == "":
-        print("File name cannot be empty.")
+    if not file_name:
+        print(error("File name cannot be empty."))
         return
-    
+
     if not file_name.lower().endswith(allowed_extensions):
         file_name += ".png"
 
