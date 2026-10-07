@@ -49,25 +49,23 @@ def list_movies() -> None:
         )
 
 
-def add_movie() -> None:
-    """
-    Adds a new movie to the database with its rating.
-    """
-    print("\n" * 50)  # Clear the console
-
+def _get_movie_title() -> str | None:
     while True:
 
         title = input("Enter the name of the movie (or q to cancel): ").strip()
 
         if title.lower() == "q":
             print(info("Adding movie cancelled."))
-            return
+            return None
 
         if title:
             break
 
         print(error("Title can't be empty! Please try again."))
+    return title
 
+
+def _get_movie_year() -> int | None:
     while True:
 
         year_input = input(
@@ -76,7 +74,7 @@ def add_movie() -> None:
 
         if year_input.lower() == "q":
             print(info("Adding movie cancelled."))
-            return
+            return None
 
         try:
             year = int(year_input)
@@ -95,6 +93,43 @@ def add_movie() -> None:
         except ValueError:
             print(error("Invalid input. Please enter valid numeric values."))
             continue
+    return year
+
+
+def _get_movie_rating() -> float | None:
+    while True:
+        rating_input = input(
+            "Enter the rating for the movie (0-10) - (or q to cancel): "
+        ).strip()
+
+        if rating_input.lower() == "q":
+            print(info("Adding movie cancelled."))
+            return None
+
+        try:
+            rating = float(rating_input)
+
+            if 0 <= rating <= 10:
+                break
+            print(error("Rating must be between 0 and 10. Please try again!"))
+
+        except ValueError:
+            print(error("Please enter a valid rating!"))
+    return rating
+
+
+def add_movie() -> None:
+    """
+    Adds a new movie to the database with its rating.
+    """
+    print("\n" * 50)  # Clear the console
+
+    title = _get_movie_title()
+    if title is None:
+        return
+    year = _get_movie_year()
+    if year is None:
+        return
 
     movies = movie_storage.get_movies()
 
@@ -106,24 +141,9 @@ def add_movie() -> None:
         print(error(f"{title} ({year}) already exists in the database."))
         return
 
-    while True:
-        rating_input = input(
-            "Enter the rating for the movie (0-10) - (or q to cancel): "
-        ).strip()
-
-        if rating_input.lower() == "q":
-            print(info("Adding movie cancelled."))
-            return
-
-        try:
-            rating = float(rating_input)
-
-            if 0 <= rating <= 10:
-                break
-            print(error("Rating must be between 0 and 10. Please try again!"))
-
-        except ValueError:
-            print(error("Please enter a valid rating!"))
+    rating = _get_movie_rating()
+    if rating is None:
+        return
 
     if movie_storage.add_movie(title, year, rating):
         print(
