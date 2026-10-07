@@ -1,11 +1,15 @@
 """
+Movie Database CLI application.
+
 A command-line movie database application that allows users
 to manage movies and their ratings and perform basic analytics.
 """
 
 import random
-import matplotlib.pyplot as plt
 from collections.abc import Callable
+from datetime import date
+
+import matplotlib.pyplot as plt
 from colors import (
     error,
     success,
@@ -16,17 +20,17 @@ from colors import (
     bold,
     Fore,
 )
-from database import load_movies, save_movies
-from datetime import date
+import movie_storage
 from models import Movie
+from movie_utils import levenshtein_distance
 
-MOVIES_FILE = "movies.json"
 
-
-def list_movies(movies: dict[int, Movie]) -> None:
+def list_movies() -> None:
     """
     Lists all the movies in the database along with their ratings.
     """
+    movies = movie_storage.get_movies()
+
     print("\n" * 50)  # Clear the console
     print("=" * 40)
     print(success(f"{len(movies)}") + " movies found in the database.")
@@ -41,73 +45,74 @@ def list_movies(movies: dict[int, Movie]) -> None:
             + bold(movie["title"])
             + f" ({movie['year']}), "
             + menu("Rating: ")
-            + f"({rating_formatted(movie['rating'])}/10)"
+            + f"{rating_formatted(movie['rating'])}/10"
         )
 
 
-def add_movie(movies: dict[int, Movie]) -> None:
+def add_movie() -> None:
     """
     Adds a new movie to the database with its rating.
     """
     print("\n" * 50)  # Clear the console
+
     title = input("Enter the name of the movie: ")
 
     try:
         year = int(input("Enter the year (YYYY) the movie was released: "))
-
         current_year = date.today().year
+
         if not 1888 <= year <= current_year:
             print("Invalid year.")
             return
+
+        movies = movie_storage.get_movies()
 
         # Check whether movie with the same title already exists in database
         if any(
             movie["title"].lower() == title.lower() and movie["year"] == year
             for movie in movies.values()
         ):
-            print(f"{title} ({year}) already exists in the database.")
+            print(error(f"{title} ({year}) already exists in the database."))
             return
 
         rating = float(input("Enter the rating for the movie (0-10): "))
 
         if not 0 <= rating <= 10:
-            print("Rating must be between 0 and 10.")
+            print(error("Rating must be between 0 and 10."))
             return
 
-        movie_id = max(movies, default=0) + 1
-
-        movies[movie_id] = {
-            "title": title,
-            "rating": rating,
-            "year": year,
-        }
-
-        save_movies(MOVIES_FILE, movies)
-        print(
-            success("Movie added: ")
-            + bold(title)
-            + f" ({year}), "
-            + menu("Rating: ")
-            + f"({rating_formatted(rating)}/10)"
-        )
+        if movie_storage.add_movie(title, year, rating):
+            print(
+                success("Movie added: ")
+                + bold(title)
+                + f" ({year}), "
+                + menu("Rating: ")
+                + f"({rating_formatted(rating)}/10)"
+            )
+        else:
+            print(error("Failed to save the movie."))
 
     except ValueError:
-        print("Invalid input. Please enter valid numeric values.")
+        print(error("Invalid input. Please enter valid numeric values."))
 
 
-def update_movie_rating(movies: dict[int, Movie]) -> None:
+def update_movie_rating() -> None:
     """
     Updates the rating of an existing movie in the database.
     """
     print("\n" * 50)  # Clear the console
 
-    list_movies(movies)
+    movies = movie_storage.get_movies()
+
+    list_movies()
 
     try:
         movie_id = int(input("\nEnter the ID of the movie to update: "))
 
         if movie_id not in movies:
-            print(f"Movie with ID {movie_id} does not exist.")
+            print(
+                error("Movie with ID ") + bold(str(movie_id)) + error("does not exist.")
+            )
             return
 
         movie = movies[movie_id]
@@ -123,26 +128,29 @@ def update_movie_rating(movies: dict[int, Movie]) -> None:
         new_rating = float(input("Enter the new rating for the movie (0-10): "))
 
         if not 0 <= new_rating <= 10:
-            print("Rating must be between 0 and 10.")
+            print(error("Rating must be between 0 and 10."))
             return
 
-        movie["rating"] = new_rating
-        save_movies(MOVIES_FILE, movies)
-
-        print(
-            f"The rating for {movie['title']} "
-            f"has been updated to {rating_formatted(new_rating)}."
-        )
+        if movie_storage.update_movie(movie_id, new_rating):
+            print(
+                success("Rating updated for ")
+                + bold(movie["title"])
+                + f" to {rating_formatted(new_rating)}/10."
+            )
+        else:
+            print(error("Failed to save the updated rating."))
 
     except ValueError:
-        print("Invalid input. Please enter a valid ID and rating.")
+        print(error("Invalid input. Please enter a valid ID and rating."))
 
 
-def generate_analytics(movies: dict[int, Movie]) -> None:
+def generate_analytics() -> None:
     """
     Generates and displays analytics about the movies in the database.
     """
     print("\n" * 50)  # Clear the console
+    movies = movie_storage.get_movies()
+
     if not movies:
         print("No movies in the database to analyze.")
         return
@@ -202,12 +210,14 @@ def generate_analytics(movies: dict[int, Movie]) -> None:
     print(menu("Median rating: " + rating_formatted(median_rating)))
 
 
-def fetch_random_movie(movies: dict[int, Movie]) -> None:
+def fetch_random_movie() -> None:
     """
     Fetches and displays a random movie from the database.
     """
 
     print("\n" * 50)  # Clear the console
+
+    movies = movie_storage.get_movies()
 
     if not movies:
         print("No movies in the database to fetch.")
@@ -223,45 +233,17 @@ def fetch_random_movie(movies: dict[int, Movie]) -> None:
     print(f"Rating: {rating_formatted(movie['rating'])}")
 
 
-def levenshtein_distance(word1: str, word2: str) -> int:
-    """Calculates the Levenshtein distance between two words.
-    The distance represents the minimum number of single-character
-    insertions, deletions, or substitutions needed to transform one word into the other.
-
-    Returns: int: The minimum number of edits required.
-    """
-    # [0] * (len(word2) + 1) = number of columns in matrix
-    # range(len(word1) + 1) = number of rows in matrix
-    matrix = [[0] * (len(word2) + 1) for i in range(len(word1) + 1)]
-
-    for i in range(len(matrix[0])):
-        matrix[0][i] = i  # Initialize row 0
-
-    for j in range(len(matrix)):
-        matrix[j][0] = j  # Initialize column 0
-
-    for i in range(1, len(matrix)):
-        for j in range(1, len(matrix[0])):
-            if word1[i - 1] == word2[j - 1]:
-                matrix[i][j] = matrix[i - 1][j - 1]
-            else:
-                matrix[i][j] = min(
-                    (matrix[i - 1][j] + 1),  # delete
-                    (matrix[i][j - 1] + 1),  # insert
-                    (matrix[i - 1][j - 1] + 1),  # replace
-                )
-
-    return matrix[-1][-1]
-
-
-def search_movies(movies: dict[int, Movie]) -> None:
+def search_movies() -> None:
     """Searches the movie database using an exact, partial, or fuzzy match.
 
     Exact and partial matches are checked first. If no direct match is found,
     the search uses Levenshtein distance to find movie titles containing words
     that are sufficiently similar to the query words.
     """
-    print("\n" * 50)  # Clear the console
+    print("\n" * 50)  # Clear the console#
+
+    movies = movie_storage.get_movies()
+
     search_query = input("What movie are you looking for?: ")
 
     if not search_query:
@@ -328,11 +310,13 @@ def search_movies(movies: dict[int, Movie]) -> None:
         )
 
 
-def sort_movies_by_rating(movies: dict[int, Movie]) -> None:
+def sort_movies_by_rating() -> None:
     """
     Displays movies from highest to lowest rating.
     """
     print("\n" * 50)  # Clear the console
+
+    movies = movie_storage.get_movies()
 
     sorted_movies = sorted(
         movies.items(), key=lambda item: item[1]["rating"], reverse=True
@@ -359,12 +343,14 @@ def sort_movies_by_rating(movies: dict[int, Movie]) -> None:
         )
 
 
-def delete_movie(movies: dict[int, Movie]) -> None:
+def delete_movie() -> None:
     """
     Deletes a movie from the database.
     """
     print("\n" * 50)  # Clear the console
-    list_movies(movies)
+    movies = movie_storage.get_movies()
+    list_movies()
+
     try:
         movie_id = int(input("Enter the ID of the movie you want to delete: "))
 
@@ -394,21 +380,27 @@ def delete_movie(movies: dict[int, Movie]) -> None:
             print(error("Movie deletion cancelled!"))
             return
 
-        del movies[movie_id]
-
-        save_movies(MOVIES_FILE, movies)
-
-        print(success("Movie deleted: ") + bold(movie["title"]) + f" ({movie['year']})")
+        if movie_storage.delete_movie(movie_id):
+            print(
+                success("Movie deleted: ")
+                + bold(movie["title"])
+                + f" ({movie['year']})"
+            )
+        else:
+            print(error("Failed to delete the movie."))
 
     except ValueError:
         print("Invalid input. Please enter a valid movie ID.")
 
 
-def create_rating_histogram(movies: dict[int, Movie]) -> None:
+def create_rating_histogram() -> None:
     """
     Creates a histogram of movie ratings.
     """
     print("\n" * 50)  # Clear the console
+
+    movies = movie_storage.get_movies()
+
     if not movies:
         print("No movies in the database to create a histogram.")
         return
@@ -436,7 +428,7 @@ def create_rating_histogram(movies: dict[int, Movie]) -> None:
     print(f"Rating histogram saved to {file_name}.")
 
 
-def run_menu(movies: dict[int, Movie]) -> None:
+def run_menu() -> None:
     """
     Displays the main menu and handles user selections until the user exits.
     """
@@ -475,12 +467,12 @@ def run_menu(movies: dict[int, Movie]) -> None:
         if 0 <= choice_index < len(menu_options):
             label, function = menu_options[choice_index]
             if function:
-                function(movies)
+                function()
                 input(info("\nPress enter to continue..."))
                 print("\n" * 50)  # Clear the console
             else:
                 # None indicates the Exit option was selected.
-                print(warning("Exiting the application. Goodbye!"))
+                print(warning("Bye!"))
                 break
         else:
             print(error("Invalid choice. Please try again."))
@@ -490,8 +482,7 @@ def main() -> None:
     """
     Initializes the movie database and starts the main menu.
     """
-    movies: dict[int, Movie] = load_movies(MOVIES_FILE)
-    run_menu(movies)
+    run_menu()
 
 
 if __name__ == "__main__":

@@ -1,62 +1,142 @@
 {
     "1": {
         "title": "The Shawshank Redemption",
-        "rating": 9.5,
+        "rating": 9.3,
         "year": 1994
     },
     "2": {
-        "title": "Pulp Fiction",
-        "rating": 8.8,
-        "year": 1994
-    },
-    "3": {
-        "title": "The Room",
-        "rating": 3.6,
-        "year": 2003
-    },
-    "4": {
         "title": "The Godfather",
         "rating": 9.2,
         "year": 1972
     },
-    "5": {
-        "title": "The Godfather: Part II",
+    "3": {
+        "title": "The Dark Knight",
+        "rating": 9.1,
+        "year": 2008
+    },
+    "4": {
+        "title": "The Godfather Part II",
         "rating": 9.0,
         "year": 1974
     },
-    "6": {
-        "title": "The Dark Knight",
-        "rating": 9.0,
-        "year": 2008
-    },
-    "7": {
+    "5": {
         "title": "12 Angry Men",
-        "rating": 8.9,
+        "rating": 9.0,
         "year": 1957
     },
+    "6": {
+        "title": "Schindler's List",
+        "rating": 9.0,
+        "year": 1993
+    },
+    "7": {
+        "title": "The Lord of the Rings: The Return of the King",
+        "rating": 9.0,
+        "year": 2003
+    },
     "8": {
-        "title": "Everything Everywhere All At Once",
+        "title": "The Lord of the Rings: The Fellowship of the Ring",
         "rating": 8.9,
-        "year": 2022
+        "year": 2001
     },
     "9": {
-        "title": "Forrest Gump",
+        "title": "Pulp Fiction",
         "rating": 8.8,
         "year": 1994
     },
     "10": {
-        "title": "Star Wars: Episode V",
+        "title": "The Good, the Bad and the Ugly",
+        "rating": 8.8,
+        "year": 1966
+    },
+    "11": {
+        "title": "The Lord of the Rings: The Two Towers",
+        "rating": 8.8,
+        "year": 2002
+    },
+    "12": {
+        "title": "Forrest Gump",
+        "rating": 8.8,
+        "year": 1994
+    },
+    "13": {
+        "title": "Fight Club",
+        "rating": 8.8,
+        "year": 1999
+    },
+    "14": {
+        "title": "Inception",
+        "rating": 8.8,
+        "year": 2010
+    },
+    "15": {
+        "title": "Star Wars: Episode V - The Empire Strikes Back",
         "rating": 8.7,
         "year": 1980
     },
-    "11": {
-        "title": "Snow White and the Seven Dwarfs",
-        "rating": 10.0,
-        "year": 1890
+    "16": {
+        "title": "Star Wars: Episode IV - A New Hope",
+        "rating": 8.6,
+        "year": 1977
     },
-    "12": {
-        "title": "The Terminator",
-        "rating": 2.0,
-        "year": 1998
+    "17": {
+        "title": "Star Wars: Episode VI - Return of the Jedi",
+        "rating": 8.3,
+        "year": 1983
+    },
+    "18": {
+        "title": "Star Wars: Episode III - Revenge of the Sith",
+        "rating": 7.6,
+        "year": 2005
+    },
+    "19": {
+        "title": "Star Wars: Episode II - Attack of the Clones",
+        "rating": 6.6,
+        "year": 2002
+    },
+    "20": {
+        "title": "Star Wars: Episode I - The Phantom Menace",
+        "rating": 6.5,
+        "year": 1999
+    },
+    "21": {
+        "title": "The Room",
+        "rating": 3.6,
+        "year": 2003
+    },
+    "22": {
+        "title": "Movie 43",
+        "rating": 4.3,
+        "year": 2013
+    },
+    "23": {
+        "title": "Battlefield Earth",
+        "rating": 2.5,
+        "year": 2000
+    },
+    "24": {
+        "title": "Cats",
+        "rating": 2.8,
+        "year": 2019
+    },
+    "25": {
+        "title": "Dragonball Evolution",
+        "rating": 2.5,
+        "year": 2009
+    },
+    "26": {
+        "title": "Star Wars: Episode VII - The Force Awakens",
+        "rating": 7.8,
+        "year": 2015
+    },
+    "27": {
+        "title": "Star Wars: Episode VIII - The Last Jedi",
+        "rating": 6.9,
+        "year": 2017
+    },
+    "28": {
+        "title": "Star Wars: Episode IX - The Rise of Skywalker",
+        "rating": 6.4,
+        "year": 2019
     }
 }

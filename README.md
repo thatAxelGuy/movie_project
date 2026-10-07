@@ -1,134 +1,175 @@
-# Python Movie CLI
+# Movie Database
 
-A command-line movie database application built with Python. It allows you to manage movies and ratings, perform basic analytics, search and sort movies, generate a histogram of movie ratings, and find movies using fuzzy search.
+A command-line movie database application built with Python. The application allows you to manage a collection of movies, store them persistently in a JSON file, search and sort movies, and view basic statistics.
 
 ## Features
 
-* List all movies with their ID, title, year, and rating
-* Add a movie with a title, year, and rating
-* Update a movie's rating by ID
-* Delete a movie by ID with confirmation
-* Search for movies
+* View all movies
+* Add a new movie
+* Update a movie's rating
+* Delete a movie by ID
+* Search movies by title
 
   * Exact and partial title matching
   * Fuzzy matching using Levenshtein distance
-* Display movie statistics
+* Show movie statistics
 
   * Average rating
-  * Median rating
   * Highest-rated movie(s)
   * Lowest-rated movie(s)
-* Select a random movie
+  * Median rating
+* Fetch a random movie
 * Sort movies by rating
-* Create and save a histogram of movie ratings
-* Persist movie data in a JSON file
+* Create a rating histogram
+* Persistent JSON storage
+* Colored CLI output for improved readability
 
-## Requirements
+## Project Structure
 
-* Python 3
-* `uv` (optional)
-
-## Setup
-
-### Using uv
-
-Install the project dependencies with:
-
-```bash
-uv sync
+```text
+movie_database/
+├── movies.py          # CLI, menu, user interaction, and movie operations
+├── movie_storage.py   # JSON persistence and database operations
+├── movie_utils.py     # Reusable utility functions
+├── models.py          # Shared type definitions
+├── config.py          # Application configuration
+├── colors.py          # CLI color and formatting helpers
+├── movies.json        # Persistent movie database
+├── requirements.txt   # Python dependencies
+├── pyproject.toml     # Project configuration
+├── uv.lock            # Dependency lock file
+└── README.md          # Project documentation
 ```
 
-### Using pip
+## Data Storage
 
-Install the dependencies listed in `requirements.txt` with:
+Movies are stored in `movies.json`.
+
+Each movie has a unique ID and contains:
+
+* `title`
+* `year`
+* `rating`
+
+Example:
+
+```json
+{
+    "1": {
+        "title": "The Matrix",
+        "year": 1999,
+        "rating": 8.7
+    },
+    "2": {
+        "title": "Inception",
+        "year": 2010,
+        "rating": 8.8
+    }
+}
+```
+
+The application converts JSON movie IDs from strings to integers when loading the data.
+
+## Running the Application
+
+Install the required dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Choose **one** of the setup methods above.
-
-## Running the Application
-
-Using `uv`:
+Run the application with:
 
 ```bash
-uv run python main.py
+python movies.py
 ```
 
-Or using Python directly after installing the dependencies:
+## Menu Options
 
-```bash
-python main.py
-```
+The application provides the following options:
 
-## Project Structure
+1. **View all movies** — Display all movies with their ID, title, year, and rating.
+2. **Add a new movie** — Add a movie after validating its release year and rating.
+3. **Update a movie rating** — Select a movie by ID and change its rating.
+4. **Show Statistics** — Display rating statistics for the database.
+5. **Show a random movie** — Select and display a random movie.
+6. **Search movies** — Search by title using exact, partial, and fuzzy matching.
+7. **Create a histogram** — Generate a histogram showing the distribution of movie ratings.
+8. **Sort movies by rating** — Display movies ordered from highest to lowest rating.
+9. **Delete a movie** — Select a movie by ID and permanently remove it from the database.
+10. **Exit** — Close the application.
+
+## Architecture
+
+The application separates user interaction from data storage:
+
+### `movies.py`
+
+Handles:
+
+* User input
+* Validation
+* Menu navigation
+* Display formatting
+* Search and analytics logic
+
+### `movie_storage.py`
+
+Handles:
+
+* Loading movies from JSON
+* Saving movies to JSON
+* Adding movies
+* Updating movie ratings
+* Deleting movies
+
+The storage module does not handle user input or display output.
+
+### `movie_utils.py`
+
+Contains reusable utility functions such as the Levenshtein distance calculation used for fuzzy movie-title searches.
+
+### `models.py`
+
+Contains shared type definitions used throughout the application.
+
+### `config.py`
+
+Contains application configuration such as the location of the JSON database file.
+
+## Search
+
+Movie titles can be searched using:
+
+* Exact matches
+* Partial matches
+* Fuzzy matching
+
+Fuzzy matching uses **Levenshtein distance** to find titles even when the search contains small spelling mistakes.
+
+For example:
 
 ```text
-.
-├── main.py
-├── models.py
-├── database.py
-├── config.py
-├── movies.json
-├── requirements.txt
-├── README.md
-├── uv.lock
-└── pyproject.toml
+Search: Incepton
+Result: Inception
 ```
 
-### File Responsibilities
+## Validation
 
-* `main.py` — Application entry point and movie management operations
-* `models.py` — Movie data structure and type definitions
-* `database.py` — Loading and saving movies to JSON
-* `config.py` — Application configuration such as the movies data file
-* `movies.json` — Persistent movie database
+The application validates user input before modifying the database.
 
-## Movie Data
+* Movie years must be between 1888 and the current year.
+* Ratings must be between `0` and `10`.
+* Movie IDs must exist before updating or deleting.
+* Duplicate movies with the same title and release year are rejected.
+* Invalid numeric input is handled without crashing the application.
 
-Each movie contains the following properties:
+## Dependencies
 
-* **Title** — Movie title
-* **Year** — Year the movie was released
-* **Rating** — Rating from 0 to 10
+The application uses:
 
-Movies are stored using a unique numeric ID:
+* Python
+* Colorama
+* Matplotlib
 
-```text
-1. The Shawshank Redemption (1994), Rating: 9.5/10
-2. Pulp Fiction (1994), Rating: 8.8/10
-```
-
-The data is persisted in `movies.json` so changes are retained between application runs.
-
-## Fuzzy Search
-
-The application uses Levenshtein distance to find movies when the search query contains spelling mistakes.
-
-For example, a search such as:
-
-```text
-Gofather
-```
-
-can find movies containing similar words such as:
-
-```text
-The Godfather
-The Godfather: Part II
-```
-
-The fuzzy search compares individual words in the query with words in each movie title and uses an edit-distance threshold to determine whether words are similar enough to match.
-
-## Movie Rating Histogram
-
-The application can generate a histogram showing the distribution of movie ratings.
-
-When creating a histogram, you can provide a filename such as:
-
-```text
-ratings.png
-```
-
-The generated image is saved to the specified location.
+See `requirements.txt` for the complete dependency list.
