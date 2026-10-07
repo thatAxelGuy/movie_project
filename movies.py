@@ -55,45 +55,86 @@ def add_movie() -> None:
     """
     print("\n" * 50)  # Clear the console
 
-    title = input("Enter the name of the movie: ")
+    while True:
 
-    try:
-        year = int(input("Enter the year (YYYY) the movie was released: "))
-        current_year = date.today().year
+        title = input("Enter the name of the movie (or q to cancel): ").strip()
 
-        if not 1888 <= year <= current_year:
-            print("Invalid year.")
+        if title.lower() == "q":
+            print(info("Adding movie cancelled."))
             return
 
-        movies = movie_storage.get_movies()
+        if title:
+            break
 
-        # Check whether movie with the same title already exists in database
-        if any(
-            movie["title"].lower() == title.lower() and movie["year"] == year
-            for movie in movies.values()
-        ):
-            print(error(f"{title} ({year}) already exists in the database."))
+        print(error("Title can't be empty! Please try again."))
+
+    while True:
+
+        year_input = input(
+            "Enter the year (YYYY) the movie was released (or q to cancel): "
+        ).strip()
+
+        if year_input.lower() == "q":
+            print(info("Adding movie cancelled."))
             return
 
-        rating = float(input("Enter the rating for the movie (0-10): "))
+        try:
+            year = int(year_input)
+            current_year = date.today().year
 
-        if not 0 <= rating <= 10:
-            print(error("Rating must be between 0 and 10."))
-            return
+            if 1888 <= year <= current_year:
+                break
 
-        if movie_storage.add_movie(title, year, rating):
             print(
-                success("Movie added: ")
-                + bold(title)
-                + f" ({year}), "
-                + menu("Rating: ")
-                + f"({rating_formatted(rating)}/10)"
+                error(
+                    f"Year must be between 1888 and {current_year}. "
+                    "Please try again."
+                )
             )
-        else:
-            print(error("Failed to save the movie."))
 
-    except ValueError:
-        print(error("Invalid input. Please enter valid numeric values."))
+        except ValueError:
+            print(error("Invalid input. Please enter valid numeric values."))
+            continue
+
+    movies = movie_storage.get_movies()
+
+    # Check whether movie with the same title already exists in database
+    if any(
+        movie["title"].lower() == title.lower() and movie["year"] == year
+        for movie in movies.values()
+    ):
+        print(error(f"{title} ({year}) already exists in the database."))
+        return
+
+    while True:
+        rating_input = input(
+            "Enter the rating for the movie (0-10) - (or q to cancel): "
+        ).strip()
+
+        if rating_input.lower() == "q":
+            print(info("Adding movie cancelled."))
+            return
+
+        try:
+            rating = float(rating_input)
+
+            if 0 <= rating <= 10:
+                break
+            print(error("Rating must be between 0 and 10. Please try again!"))
+
+        except ValueError:
+            print(error("Please enter a valid rating!"))
+
+    if movie_storage.add_movie(title, year, rating):
+        print(
+            success("Movie added: ")
+            + bold(title)
+            + f" ({year}), "
+            + menu("Rating: ")
+            + f"({rating_formatted(rating)}/10)"
+        )
+    else:
+        print(error("Failed to save the movie."))
 
 
 def update_movie_rating() -> None:
@@ -105,43 +146,68 @@ def update_movie_rating() -> None:
     movies = movie_storage.get_movies()
 
     list_movies()
+    while True:
+        id_input = input(
+            "\nEnter the ID of the movie to update (or q to cancel): "
+        ).strip()
 
-    try:
-        movie_id = int(input("\nEnter the ID of the movie to update: "))
-
-        if movie_id not in movies:
-            print(
-                error("Movie with ID ") + bold(str(movie_id)) + error("does not exist.")
-            )
+        if id_input.lower() == "q":
+            print(info("Update movie rating cancelled."))
             return
 
-        movie = movies[movie_id]
+        try:
+            movie_id = int(id_input)
 
-        print(
-            menu("Selected movie: ")
-            + bold(movie["title"])
-            + f" ({movie['year']}), "
-            + menu("Current rating: ")
-            + f"({rating_formatted(movie['rating'])}/10)"
-        )
+            if movie_id not in movies:
+                print(
+                    error("Movie with ID ")
+                    + bold(str(movie_id))
+                    + error("does not exist.")
+                )
+                continue
+            break
+        except ValueError:
+            print(error("Invalid input. Please enter a valid movie id."))
 
-        new_rating = float(input("Enter the new rating for the movie (0-10): "))
+    movie = movies[movie_id]
 
-        if not 0 <= new_rating <= 10:
+    print(
+        menu("Selected movie: ")
+        + bold(movie["title"])
+        + f" ({movie['year']}), "
+        + menu("Current rating: ")
+        + f"({rating_formatted(movie['rating'])}/10)"
+    )
+
+    while True:
+
+        rating_input = input(
+            "Enter the new rating for the movie (0-10) -" " (or q to cancel): "
+        ).strip()
+
+        if rating_input.lower() == "q":
+            print(info("Update rating was cancelled."))
+            return
+
+        try:
+
+            new_rating = float(rating_input)
+
+            if 0 <= new_rating <= 10:
+                break
             print(error("Rating must be between 0 and 10."))
-            return
 
-        if movie_storage.update_movie(movie_id, new_rating):
-            print(
-                success("Rating updated for ")
-                + bold(movie["title"])
-                + f" to {rating_formatted(new_rating)}/10."
-            )
-        else:
-            print(error("Failed to save the updated rating."))
+        except ValueError:
+            print(error("Invalid input. Please enter a valid rating (0-10)."))
 
-    except ValueError:
-        print(error("Invalid input. Please enter a valid ID and rating."))
+    if movie_storage.update_movie(movie_id, new_rating):
+        print(
+            success("Rating updated for ")
+            + bold(movie["title"])
+            + f" to {rating_formatted(new_rating)}/10."
+        )
+    else:
+        print(error("Failed to save the updated rating."))
 
 
 def generate_analytics() -> None:
@@ -350,47 +416,60 @@ def delete_movie() -> None:
     print("\n" * 50)  # Clear the console
     movies = movie_storage.get_movies()
     list_movies()
+    while True:
+        id_input = input(
+            "Enter the ID of the movie you want to delete " "(or q to cancel): "
+        ).strip()
 
-    try:
-        movie_id = int(input("Enter the ID of the movie you want to delete: "))
-
-        if movie_id not in movies:
-            print(
-                error("Movie with ID ")
-                + bold(str(movie_id))
-                + error(" does not exist.")
-            )
+        if id_input.lower() == "q":
+            print(info("Delete movie cancelled."))
             return
 
-        movie = movies[movie_id]
+        try:
+            movie_id = int(id_input)
 
-        print(
-            menu("Movie to delete: ")
-            + bold(movie["title"])
-            + f" ({movie['year']}), "
-            + menu("Rating: ")
-            + f"({rating_formatted(movie['rating'])}/10)"
+            if movie_id not in movies:
+                print(
+                    error("Movie with ID ")
+                    + bold(str(movie_id))
+                    + error(" does not exist.")
+                )
+                continue
+            break
+        except ValueError:
+            print("Invalid input. Please enter a valid movie ID.")
+
+    movie = movies[movie_id]
+
+    print(
+        menu("Movie to delete: ")
+        + bold(movie["title"])
+        + f" ({movie['year']}), "
+        + menu("Rating: ")
+        + f"({rating_formatted(movie['rating'])}/10)"
+    )
+
+    while True:
+
+        confirmation = (
+            input(warning("Are you sure you want to delete this movie? (y/n): "))
+            .strip()
+            .lower()
         )
 
-        confirmation = input(
-            warning("Are you sure you want to delete this movie? (y/n): ")
-        )
+        if confirmation == "y":
+            break
 
-        if confirmation.lower() != "y":
+        if confirmation == "n":
             print(error("Movie deletion cancelled!"))
             return
 
-        if movie_storage.delete_movie(movie_id):
-            print(
-                success("Movie deleted: ")
-                + bold(movie["title"])
-                + f" ({movie['year']})"
-            )
-        else:
-            print(error("Failed to delete the movie."))
+        print(error("Please enter y or n."))
 
-    except ValueError:
-        print("Invalid input. Please enter a valid movie ID.")
+    if movie_storage.delete_movie(movie_id):
+        print(success("Movie deleted: ") + bold(movie["title"]) + f" ({movie['year']})")
+    else:
+        print(error("Failed to delete the movie."))
 
 
 def create_rating_histogram() -> None:
