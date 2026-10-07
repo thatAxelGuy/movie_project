@@ -20,7 +20,9 @@ from colors import (
     bold,
     Fore,
 )
-import movie_storage
+
+# import movie_storage
+import movie_storage_sql as storage
 from models import Movie
 from movie_utils import levenshtein_distance
 
@@ -29,7 +31,7 @@ def list_movies() -> None:
     """
     Lists all the movies in the database along with their ratings.
     """
-    movies = movie_storage.get_movies()
+    movies = storage.list_movies()
 
     print("\n" * 50)  # Clear the console
     print("=" * 40)
@@ -50,6 +52,7 @@ def list_movies() -> None:
 
 
 def _get_movie_title() -> str | None:
+    """Get and validate the movie title from user input."""
     while True:
 
         title = input("Enter the name of the movie (or q to cancel): ").strip()
@@ -66,6 +69,7 @@ def _get_movie_title() -> str | None:
 
 
 def _get_movie_year() -> int | None:
+    """Get and validate the movie year from user input."""
     while True:
 
         year_input = input(
@@ -97,6 +101,7 @@ def _get_movie_year() -> int | None:
 
 
 def _get_movie_rating() -> float | None:
+    """Get and validate the movie rating from user input."""
     while True:
         rating_input = input(
             "Enter the rating for the movie (0-10) - (or q to cancel): "
@@ -131,21 +136,18 @@ def add_movie() -> None:
     if year is None:
         return
 
-    movies = movie_storage.get_movies()
+    movies = storage.list_movies()
 
     # Check whether movie with the same title already exists in database
-    if any(
-        movie["title"].lower() == title.lower() and movie["year"] == year
-        for movie in movies.values()
-    ):
-        print(error(f"{title} ({year}) already exists in the database."))
+    if any(movie["title"].lower() == title.lower() for movie in movies.values()):
+        print(error(f"{title} already exists in the database."))
         return
 
     rating = _get_movie_rating()
     if rating is None:
         return
 
-    if movie_storage.add_movie(title, year, rating):
+    if storage.add_movie(title=title, year=year, rating=rating):
         print(
             success("Movie added: ")
             + bold(title)
@@ -163,7 +165,7 @@ def update_movie_rating() -> None:
     """
     print("\n" * 50)  # Clear the console
 
-    movies = movie_storage.get_movies()
+    movies = storage.list_movies()
 
     list_movies()
     while True:
@@ -220,7 +222,7 @@ def update_movie_rating() -> None:
         except ValueError:
             print(error("Invalid input. Please enter a valid rating (0-10)."))
 
-    if movie_storage.update_movie(movie_id, new_rating):
+    if storage.update_movie(movie_id, new_rating):
         print(
             success("Rating updated for ")
             + bold(movie["title"])
@@ -235,7 +237,7 @@ def generate_analytics() -> None:
     Generates and displays analytics about the movies in the database.
     """
     print("\n" * 50)  # Clear the console
-    movies = movie_storage.get_movies()
+    movies = storage.list_movies()
 
     if not movies:
         print("No movies in the database to analyze.")
@@ -303,7 +305,7 @@ def fetch_random_movie() -> None:
 
     print("\n" * 50)  # Clear the console
 
-    movies = movie_storage.get_movies()
+    movies = storage.list_movies()
 
     if not movies:
         print("No movies in the database to fetch.")
@@ -328,7 +330,7 @@ def search_movies() -> None:
     """
     print("\n" * 50)  # Clear the console#
 
-    movies = movie_storage.get_movies()
+    movies = storage.list_movies()
 
     search_query = input("What movie are you looking for?: ")
 
@@ -402,7 +404,7 @@ def sort_movies_by_rating() -> None:
     """
     print("\n" * 50)  # Clear the console
 
-    movies = movie_storage.get_movies()
+    movies = storage.list_movies()
 
     sorted_movies = sorted(
         movies.items(), key=lambda item: item[1]["rating"], reverse=True
@@ -434,7 +436,7 @@ def delete_movie() -> None:
     Deletes a movie from the database.
     """
     print("\n" * 50)  # Clear the console
-    movies = movie_storage.get_movies()
+    movies = storage.list_movies()
     list_movies()
     while True:
         id_input = input(
@@ -486,7 +488,7 @@ def delete_movie() -> None:
 
         print(error("Please enter y or n."))
 
-    if movie_storage.delete_movie(movie_id):
+    if storage.delete_movie(movie_id):
         print(success("Movie deleted: ") + bold(movie["title"]) + f" ({movie['year']})")
     else:
         print(error("Failed to delete the movie."))
@@ -498,7 +500,7 @@ def create_rating_histogram() -> None:
     """
     print("\n" * 50)  # Clear the console
 
-    movies = movie_storage.get_movies()
+    movies = storage.list_movies()
 
     if not movies:
         print("No movies in the database to create a histogram.")
