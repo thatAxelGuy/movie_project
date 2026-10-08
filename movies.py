@@ -37,7 +37,7 @@ API_KEY = os.getenv("OMDB_API_KEY")
 if not API_KEY:
     raise ValueError("OMDB_API_KEY is not set in the environment.")
 
-DATA_URL = f"http://www.omdbapi.com/"
+DATA_URL = "http://www.omdbapi.com/"
 POSTER_URL = f"http://img.omdbapi.com/?apikey={API_KEY}&"
 
 
@@ -137,33 +137,42 @@ def _get_movie_rating() -> float | None:
     return rating
 
 
-def get_movie_from_api(imdb_id: str) -> dict:
+def get_movie_from_api(imdb_id: str) -> dict | None:
     """Fetch detailed movie information from the OMDb API."""
-    response = requests.get(
-        DATA_URL,
-        params={
-            "apikey": API_KEY,
-            "i": imdb_id,
-        },
-        timeout=10,
-    )
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = requests.get(
+            DATA_URL,
+            params={
+                "apikey": API_KEY,
+                "i": imdb_id,
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(error(f"Could not connect to OMDb API: {e}"))
+        return None
 
-def search_movies_from_api(title: str) -> dict:
+
+def search_movies_from_api(title: str) -> dict | None:
     """Fetch movie information from OMDB API"""
+    try:
+        response = requests.get(
+            DATA_URL,
+            params={
+                "apikey": API_KEY,
+                "s": title,
+                "type": "movie",
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(error(f"Could not connect to OMDb API: {e}"))
+        return None
 
-    response = requests.get(
-        DATA_URL,
-        params={
-            "apikey": API_KEY,
-            "s": title,
-            "type": "movie",
-        },
-        timeout=10,
-    )
-    response.raise_for_status()
-    return response.json()
 
 def _display_movie_search_results(movies: list[dict]) -> None:
     """Display movie search results as numbered options."""
@@ -172,12 +181,8 @@ def _display_movie_search_results(movies: list[dict]) -> None:
 
     for index, movie in enumerate(movies, start=1):
         print(
-            f"{menu(str(index) + '. ')}"
-            f"{bold(movie['Title'])} "
-            f"({movie['Year']})"
+            f"{menu(str(index) + '. ')}" f"{bold(movie['Title'])} " f"({movie['Year']})"
         )
-
-
 
 
 def add_movie() -> None:
@@ -198,6 +203,9 @@ def add_movie() -> None:
         return
 
     search_results = search_movies_from_api(title)
+
+    if search_results is None:
+        return
 
     if search_results.get("Response") == "False":
         print(error(search_results.get("Error", "Movie not found.")))
@@ -232,18 +240,25 @@ def add_movie() -> None:
 
     selected_movie = movie_list[choice - 1]
 
-    movie_id = selected_movie.get('imdbID')
+    movie_id = selected_movie.get("imdbID")
 
     movie = get_movie_from_api(movie_id)
+
+    if movie is None:
+        return
+
+    if movie.get("Response") == "False":
+        print(error(movie.get("Error", "Movie lookup failed.")))
+        return
 
     movie_title = movie["Title"]
     movie_year = int(movie["Year"][:4])
     movie_rating = float(movie["imdbRating"])
+    poster_url = movie.get("Poster", "N/A")
 
     if storage.add_movie(
-        title=movie_title,
-        year=movie_year,
-        rating=movie_rating):
+        title=movie_title, year=movie_year, rating=movie_rating, poster_url=poster_url
+    ):
         print(
             success("Movie added: ")
             + bold(movie_title)
@@ -251,7 +266,6 @@ def add_movie() -> None:
             + menu("Rating: ")
             + f"({rating_formatted(movie_rating)}/10)"
         )
-        print(movie['imdbRating'])
     else:
         print(error("Failed to save the movie."))
 

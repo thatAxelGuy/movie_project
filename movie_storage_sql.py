@@ -18,7 +18,8 @@ with engine.connect() as connection:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT UNIQUE NOT NULL,
             year INTEGER NOT NULL,
-            rating REAL NOT NULL
+            rating REAL NOT NULL,
+            poster_url TEXT
         )
     """))
     connection.commit()
@@ -27,28 +28,37 @@ with engine.connect() as connection:
 def list_movies() -> dict[int, Movie]:
     """Retrieve all movies from the database."""
     with engine.connect() as connection:
-        result = connection.execute(text("SELECT id, title, year, rating FROM movies"))
+        result = connection.execute(
+            text(
+                "SELECT id, title, year, rating, poster_url FROM movies"
+            )
+        )
         movies = result.fetchall()
 
     return {
         row[0]: {
             "title": row[1],
             "year": row[2],
-            "rating": row[3]}
+            "rating": row[3],
+            "poster_url": row[4] or "N/A"}
             for row in movies
         }
 
 
-def add_movie(title: str, year: int, rating: float) -> bool:
+def add_movie(title: str, year: int, rating: float, poster_url: str = "N/A") -> bool:
     """Add a new movie to the database."""
     with engine.connect() as connection:
         try:
             connection.execute(
                 text(
-                    "INSERT INTO movies (title, year, rating) "
-                    "VALUES (:title, :year, :rating)"
+                    "INSERT INTO movies (title, year, rating, poster_url) "
+                    "VALUES (:title, :year, :rating, :poster_url)"
                 ),
-                {"title": title, "year": year, "rating": rating},
+                {
+                    "title": title,
+                    "year": year,
+                    "rating": rating,
+                    "poster_url": poster_url},
             )
             connection.commit()
             return True
