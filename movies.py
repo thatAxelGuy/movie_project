@@ -6,6 +6,9 @@ to manage movies and their ratings and perform basic analytics.
 """
 
 import random
+import os
+import requests
+from dotenv import load_dotenv
 from collections.abc import Callable
 from datetime import date
 
@@ -25,6 +28,17 @@ from colors import (
 import movie_storage_sql as storage
 from models import Movie
 from movie_utils import levenshtein_distance
+
+load_dotenv()
+
+
+API_KEY = os.getenv("OMDB_API_KEY")
+
+if not API_KEY:
+    raise ValueError("OMDB_API_KEY is not set in the environment.")
+
+DATA_URL = f"http://www.omdbapi.com/"
+POSTER_URL = f"http://img.omdbapi.com/?apikey={API_KEY}&"
 
 
 def list_movies() -> None:
@@ -123,6 +137,49 @@ def _get_movie_rating() -> float | None:
     return rating
 
 
+def get_movie_from_api(imdb_id: str) -> dict:
+    """Fetch detailed movie information from the OMDb API."""
+    response = requests.get(
+        DATA_URL,
+        params={
+            "apikey": API_KEY,
+            "i": imdb_id,
+        },
+        timeout=10,
+    )
+    response.raise_for_status()
+    return response.json()
+
+def search_movies_from_api(title: str) -> dict:
+    """Fetch movie information from OMDB API"""
+
+    response = requests.get(
+        DATA_URL,
+        params={
+            "apikey": API_KEY,
+            "s": title,
+            "type": "movie",
+        },
+        timeout=10,
+    )
+    response.raise_for_status()
+    return response.json()
+
+def _display_movie_search_results(movies: list[dict]) -> None:
+    """Display movie search results as numbered options."""
+    print("\n" + menu("Search results"))
+    print("-" * 40)
+
+    for index, movie in enumerate(movies, start=1):
+        print(
+            f"{menu(str(index) + '. ')}"
+            f"{bold(movie['Title'])} "
+            f"({movie['Year']})"
+        )
+
+
+
+
 def add_movie() -> None:
     """
     Adds a new movie to the database with its rating.
@@ -132,9 +189,6 @@ def add_movie() -> None:
     title = _get_movie_title()
     if title is None:
         return
-    year = _get_movie_year()
-    if year is None:
-        return
 
     movies = storage.list_movies()
 
@@ -143,18 +197,61 @@ def add_movie() -> None:
         print(error(f"{title} already exists in the database."))
         return
 
-    rating = _get_movie_rating()
-    if rating is None:
+    search_results = search_movies_from_api(title)
+
+    if search_results.get("Response") == "False":
+        print(error(search_results.get("Error", "Movie not found.")))
         return
 
-    if storage.add_movie(title=title, year=year, rating=rating):
+    movie_list = search_results.get("Search", [])[:5]
+
+    _display_movie_search_results(movie_list)
+
+    while True:
+        choice = (
+            input(
+                "\nEnter q to cancel.\nWhich movie would you like to add "
+                f"(1-{len(movie_list)}): "
+            )
+        ).strip()
+
+        if choice.lower() == "q":
+            print(info("Add movie cancelled."))
+            return
+
+        try:
+            choice = int(choice)
+        except ValueError:
+            print(error("Please enter a valid number."))
+            continue
+
+        if 1 <= choice <= len(movie_list):
+            break
+
+        print(error(f"Please enter a number between 1 and {len(movie_list)}."))
+
+    selected_movie = movie_list[choice - 1]
+
+    movie_id = selected_movie.get('imdbID')
+
+    movie = get_movie_from_api(movie_id)
+
+    movie_title = movie["Title"]
+    movie_year = int(movie["Year"][:4])
+    movie_rating = float(movie["imdbRating"])
+
+    if storage.add_movie(
+        title=movie_title,
+        year=movie_year,
+        rating=movie_rating):
         print(
             success("Movie added: ")
-            + bold(title)
-            + f" ({year}), "
+            + bold(movie_title)
+            + f" ({movie_year}), "
             + menu("Rating: ")
-            + f"({rating_formatted(rating)}/10)"
+            + f"({rating_formatted(movie_rating)}/10)"
         )
+        print(movie['imdbRating'])
     else:
         print(error("Failed to save the movie."))
 

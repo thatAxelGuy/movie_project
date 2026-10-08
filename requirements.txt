@@ -1,3 +1,5 @@
 colorama
 matplotlib
 sqlalchemy
+requests
+python-dotenv
