@@ -32,14 +32,16 @@ movie_database/
 ├── movie_api.py           # OMDb API client (search, lookup) and API key setup
 ├── movie_actions.py        # CRUD menu actions: list, add, update, delete
 ├── movie_analytics.py       # Read-only menu actions: stats, random, search, sort, histogram
-├── movie_storage_sql.py    # SQLAlchemy + SQLite persistence (live storage backend)
-├── movie_storage.py        # Legacy JSON persistence (unused, kept for reference)
+├── storage/                 # Storage package
+│   ├── movie_storage_sql.py # SQLAlchemy + SQLite persistence (live storage backend)
+│   └── movie_storage.py     # Legacy JSON persistence (unused, kept for reference)
 ├── movie_utils.py          # Reusable utility functions (e.g. Levenshtein distance)
 ├── models.py               # Shared type definitions
 ├── config.py                # Application configuration (DB URL, legacy JSON path)
 ├── colors.py                # CLI color and formatting helpers
-├── movies.db                 # SQLite movie database (live storage)
-├── movies.json              # Legacy JSON movie database (unused)
+├── data/                     # Database/JSON data files
+│   ├── movies.db             # SQLite movie database (live storage)
+│   └── movies.json          # Legacy JSON movie database (unused)
 ├── .env                      # OMDB_API_KEY (not committed)
 ├── requirements.txt         # Python dependencies
 ├── pyproject.toml           # Project configuration
@@ -49,7 +51,7 @@ movie_database/
 
 ## Data Storage
 
-Movies are stored in a SQLite database (`movies.db`), accessed through `movie_storage_sql.py` via SQLAlchemy.
+Movies are stored in a SQLite database (`data/movies.db`), accessed through `storage/movie_storage_sql.py` via SQLAlchemy.
 
 Each movie has a unique ID and contains:
 
@@ -58,7 +60,7 @@ Each movie has a unique ID and contains:
 * `rating`
 * `poster_url`
 
-The older `movie_storage.py` (JSON-backed, `movies.json`) implementation is left in place but not active — its function signatures have drifted from the SQL version and it predates the `poster_url` field.
+The older `storage/movie_storage.py` (JSON-backed, `data/movies.json`) implementation is left in place but not active — its function signatures have drifted from the SQL version and it predates the `poster_url` field.
 
 ## Running the Application
 
@@ -119,7 +121,7 @@ CRUD menu actions and their input-prompt validation: `list_movies`, `add_movie`,
 
 Read-only analytics/search/reporting menu actions: `generate_analytics`, `fetch_random_movie`, `search_movies`, `sort_movies_by_rating`, `create_rating_histogram`.
 
-### `movie_storage_sql.py`
+### `storage/movie_storage_sql.py`
 
 Handles all database access: listing, adding, updating, and deleting movies in SQLite via SQLAlchemy. Does not handle user input or display output.
 

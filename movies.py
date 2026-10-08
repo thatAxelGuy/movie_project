@@ -11,9 +11,10 @@ from movie_analytics import (
     search_movies,
     sort_movies_by_rating,
 )
+from movie_website import generate_website
 
-# import movie_storage
-import movie_storage_sql as storage
+# from storage import movie_storage
+from storage import movie_storage_sql as storage
 
 
 def run_menu() -> None:
@@ -31,6 +32,7 @@ def run_menu() -> None:
         ("Search movies", search_movies),
         ("Create a histogram", create_rating_histogram),
         ("Sort movies by rating", sort_movies_by_rating),
+        ("Generate website", generate_website),
         (error("Delete a movie"), delete_movie),
     ]
 

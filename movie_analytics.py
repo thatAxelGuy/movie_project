@@ -8,7 +8,7 @@ from colors import Fore, bold, error, info, menu, rating_formatted, success
 from models import Movie
 from movie_utils import levenshtein_distance
 
-import movie_storage_sql as storage
+from storage import movie_storage_sql as storage
 
 
 def generate_analytics() -> None:

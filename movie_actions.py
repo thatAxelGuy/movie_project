@@ -3,7 +3,7 @@
 from colors import bold, error, info, menu, rating_formatted, success, warning
 from movie_api import get_movie_from_api, search_movies_from_api
 
-import movie_storage_sql as storage
+from storage import movie_storage_sql as storage
 
 
 def list_movies() -> None:
