@@ -1,8 +1,10 @@
 """SQLite-backed movie storage helpers."""
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import IntegrityError
 
 import config
+from colors import error
 from models import Movie
 
 engine = create_engine(config.DB_URL, echo=config.DB_ECHO)
@@ -43,6 +45,16 @@ def list_movies() -> dict[int, Movie]:
         }
 
 
+def movie_exists(title: str) -> bool:
+    """Check whether a movie with the given title already exists."""
+    with engine.connect() as connection:
+        result = connection.execute(
+            text("SELECT 1 FROM movies WHERE title = :title"),
+            {"title": title},
+        )
+        return result.first() is not None
+
+
 def add_movie(title: str, year: int, rating: float, poster_url: str = "N/A") -> bool:
     """Add a movie to the database."""
     with engine.connect() as connection:
@@ -60,35 +72,27 @@ def add_movie(title: str, year: int, rating: float, poster_url: str = "N/A") -> 
             )
             connection.commit()
             return True
-        except Exception as e:
-            print(f"Error: {e}")
+        except IntegrityError:
+            print(error(f"A movie with the title '{title}' already exists."))
             return False
 
 
 def delete_movie(movie_id: int) -> bool:
     """Delete a movie from the database."""
     with engine.connect() as connection:
-        try:
-            result = connection.execute(
-                text("DELETE FROM movies WHERE id = :id"), {"id": movie_id}
-            )
-            connection.commit()
-            return result.rowcount > 0
-        except Exception as e:
-            print(f"Error: {e}")
-            return False
+        result = connection.execute(
+            text("DELETE FROM movies WHERE id = :id"), {"id": movie_id}
+        )
+        connection.commit()
+        return result.rowcount > 0
 
 
 def update_movie(movie_id: int, rating: float) -> bool:
     """Update a movie rating in the database."""
     with engine.connect() as connection:
-        try:
-            result = connection.execute(
-                text("UPDATE movies SET rating = :rating " "WHERE id = :id"),
-                {"id": movie_id, "rating": rating},
-            )
-            connection.commit()
-            return result.rowcount > 0
-        except Exception as e:
-            print(f"Error: {e}")
-            return False
+        result = connection.execute(
+            text("UPDATE movies SET rating = :rating " "WHERE id = :id"),
+            {"id": movie_id, "rating": rating},
+        )
+        connection.commit()
+        return result.rowcount > 0
