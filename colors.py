@@ -1,18 +1,18 @@
 from colorama import Fore, Style
 
-def error(text) -> str:
+def error(text: str) -> str:
     return f"{Fore.RED}{text}{Style.RESET_ALL}"
 
-def success(text) -> str:
+def success(text: str) -> str:
     return f"{Fore.GREEN}{text}{Style.RESET_ALL}"
 
-def warning(text) -> str:
+def warning(text: str) -> str:
     return f"{Fore.YELLOW}{text}{Style.RESET_ALL}"
 
-def info(text) -> str:
+def info(text: str) -> str:
     return f"{Fore.CYAN}{text}{Style.RESET_ALL}"
 
-def menu(text) -> str:
+def menu(text: str) -> str:
     return f"{Fore.BLUE}{text}{Style.RESET_ALL}"
 
 def rating_formatted(rating: float) -> str:

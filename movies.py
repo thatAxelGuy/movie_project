@@ -666,6 +666,7 @@ def run_menu() -> None:
 
 def main() -> None:
     """Start the movie database application."""
+    storage.init_db()
     run_menu()
 
 
