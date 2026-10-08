@@ -1,24 +1,8 @@
-"""
-Utility functions for the movie database application.
+"""Utility helpers for movie search and matching."""
 
-This module contains reusable helper functions used by the application.
-"""
 
 def levenshtein_distance(word1: str, word2: str) -> int:
-    """
-    Calculates the Levenshtein distance between two words.
-
-    The distance is the minimum number of single-character edits
-    required to transform one word into the other.
-
-    Args:
-        word1: The first word.
-        word2: The second word.
-
-    Returns:
-        int: The minimum number of insertions, deletions, or
-        substitutions required to transform one word into the other.
-    """
+    """Return the Levenshtein distance between two strings."""
     matrix = [[0] * (len(word2) + 1) for _ in range(len(word1) + 1)]
 
     matrix[0] = list(range(len(word2) + 1))

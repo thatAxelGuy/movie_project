@@ -1,9 +1,4 @@
-"""
-Movie Database CLI application.
-
-A command-line movie database application that allows users
-to manage movies and their ratings and perform basic analytics.
-"""
+"""Movie database CLI application."""
 
 import random
 import os
@@ -66,7 +61,7 @@ def list_movies() -> None:
 
 
 def _get_movie_title() -> str | None:
-    """Get and validate the movie title from user input."""
+    """Prompt for and validate a movie title."""
     while True:
 
         title = input("Enter the name of the movie (or q to cancel): ").strip()
@@ -83,7 +78,7 @@ def _get_movie_title() -> str | None:
 
 
 def _get_movie_year() -> int | None:
-    """Get and validate the movie year from user input."""
+    """Prompt for and validate a movie year."""
     while True:
 
         year_input = input(
@@ -115,7 +110,7 @@ def _get_movie_year() -> int | None:
 
 
 def _get_movie_rating() -> float | None:
-    """Get and validate the movie rating from user input."""
+    """Prompt for and validate a movie rating."""
     while True:
         rating_input = input(
             "Enter the rating for the movie (0-10) - (or q to cancel): "
@@ -138,7 +133,7 @@ def _get_movie_rating() -> float | None:
 
 
 def get_movie_from_api(imdb_id: str) -> dict | None:
-    """Fetch detailed movie information from the OMDb API."""
+    """Fetch detailed movie data from the OMDb API."""
     try:
         response = requests.get(
             DATA_URL,
@@ -156,7 +151,7 @@ def get_movie_from_api(imdb_id: str) -> dict | None:
 
 
 def search_movies_from_api(title: str) -> dict | None:
-    """Fetch movie information from OMDB API"""
+    """Search for movies by title in the OMDb API."""
     try:
         response = requests.get(
             DATA_URL,
@@ -175,7 +170,7 @@ def search_movies_from_api(title: str) -> dict | None:
 
 
 def _display_movie_search_results(movies: list[dict]) -> None:
-    """Display movie search results as numbered options."""
+    """Print movie search results with numbered choices."""
     print("\n" + menu("Search results"))
     print("-" * 40)
 
@@ -186,9 +181,7 @@ def _display_movie_search_results(movies: list[dict]) -> None:
 
 
 def add_movie() -> None:
-    """
-    Adds a new movie to the database with its rating.
-    """
+    """Add a movie to the database."""
     print("\n" * 50)  # Clear the console
 
     title = _get_movie_title()
@@ -271,9 +264,7 @@ def add_movie() -> None:
 
 
 def update_movie_rating() -> None:
-    """
-    Updates the rating of an existing movie in the database.
-    """
+    """Update an existing movie rating."""
     print("\n" * 50)  # Clear the console
 
     movies = storage.list_movies()
@@ -344,9 +335,7 @@ def update_movie_rating() -> None:
 
 
 def generate_analytics() -> None:
-    """
-    Generates and displays analytics about the movies in the database.
-    """
+    """Show summary statistics for the movie database."""
     print("\n" * 50)  # Clear the console
     movies = storage.list_movies()
 
@@ -410,9 +399,7 @@ def generate_analytics() -> None:
 
 
 def fetch_random_movie() -> None:
-    """
-    Fetches and displays a random movie from the database.
-    """
+    """Display a random movie from the database."""
 
     print("\n" * 50)  # Clear the console
 
@@ -433,12 +420,7 @@ def fetch_random_movie() -> None:
 
 
 def search_movies() -> None:
-    """Searches the movie database using an exact, partial, or fuzzy match.
-
-    Exact and partial matches are checked first. If no direct match is found,
-    the search uses Levenshtein distance to find movie titles containing words
-    that are sufficiently similar to the query words.
-    """
+    """Search the movie database by title using direct and fuzzy matching."""
     print("\n" * 50)  # Clear the console#
 
     movies = storage.list_movies()
@@ -510,9 +492,7 @@ def search_movies() -> None:
 
 
 def sort_movies_by_rating() -> None:
-    """
-    Displays movies from highest to lowest rating.
-    """
+    """Show movies sorted by rating, highest first."""
     print("\n" * 50)  # Clear the console
 
     movies = storage.list_movies()
@@ -543,9 +523,7 @@ def sort_movies_by_rating() -> None:
 
 
 def delete_movie() -> None:
-    """
-    Deletes a movie from the database.
-    """
+    """Delete a movie from the database."""
     print("\n" * 50)  # Clear the console
     movies = storage.list_movies()
     list_movies()
@@ -606,9 +584,7 @@ def delete_movie() -> None:
 
 
 def create_rating_histogram() -> None:
-    """
-    Creates a histogram of movie ratings.
-    """
+    """Create a histogram of movie ratings."""
     print("\n" * 50)  # Clear the console
 
     movies = storage.list_movies()
@@ -641,9 +617,7 @@ def create_rating_histogram() -> None:
 
 
 def run_menu() -> None:
-    """
-    Displays the main menu and handles user selections until the user exits.
-    """
+    """Display the main menu and handle user choices."""
 
     # Each menu item contains a display label and its associated function.
     # Exit has no function, so its value is None.
@@ -691,9 +665,7 @@ def run_menu() -> None:
 
 
 def main() -> None:
-    """
-    Initializes the movie database and starts the main menu.
-    """
+    """Start the movie database application."""
     run_menu()
 
 

@@ -1,6 +1,4 @@
-"""
-Handles SQLite storage for the movie database.
-"""
+"""SQLite-backed movie storage helpers."""
 
 from sqlalchemy import create_engine, text
 from models import Movie
@@ -26,7 +24,7 @@ with engine.connect() as connection:
 
 
 def list_movies() -> dict[int, Movie]:
-    """Retrieve all movies from the database."""
+    """Return all movies from the database."""
     with engine.connect() as connection:
         result = connection.execute(
             text(
@@ -46,7 +44,7 @@ def list_movies() -> dict[int, Movie]:
 
 
 def add_movie(title: str, year: int, rating: float, poster_url: str = "N/A") -> bool:
-    """Add a new movie to the database."""
+    """Add a movie to the database."""
     with engine.connect() as connection:
         try:
             connection.execute(
@@ -82,7 +80,7 @@ def delete_movie(movie_id: int) -> bool:
 
 
 def update_movie(movie_id: int, rating: float) -> bool:
-    """Update a movie's rating in the database."""
+    """Update a movie rating in the database."""
     with engine.connect() as connection:
         try:
             result = connection.execute(
