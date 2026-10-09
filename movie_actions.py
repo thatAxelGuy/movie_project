@@ -119,6 +119,7 @@ def add_movie(user_id: str) -> None:
     movie_year = int(movie["Year"][:4])
     movie_rating = float(movie["imdbRating"])
     poster_url = movie.get("Poster", "N/A")
+    country = movie.get("Country", "N/A")
 
     if storage.movie_exists(user_id, movie_title):
         print(
@@ -134,6 +135,7 @@ def add_movie(user_id: str) -> None:
         year=movie_year,
         rating=movie_rating,
         poster_url=poster_url,
+        country=country
     ):
         print(
             success("Movie added: ")

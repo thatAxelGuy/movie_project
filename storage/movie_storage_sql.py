@@ -74,7 +74,7 @@ def create_user(name: str) -> str | None:
                     INSERT INTO users (id, name)
                     VALUES (:id, :name)
                 """),
-                {"id": user_id, "name": name}
+                {"id": user_id, "name": name},
             )
     except IntegrityError:
         # users.name is UNIQUE, so a duplicate name is rejected by the database.
@@ -126,9 +126,7 @@ def get_user_by_name(name: str) -> str | None:
 def list_users() -> list[tuple[str, str]]:
     """Return all users as (id, name) tuples, ordered by name."""
     with engine.connect() as connection:
-        result = connection.execute(
-            text("SELECT id, name FROM users ORDER BY name")
-        )
+        result = connection.execute(text("SELECT id, name FROM users ORDER BY name"))
         return [(row[0], row[1]) for row in result.fetchall()]
 
 
@@ -148,7 +146,12 @@ def movie_exists(user_id: str, title: str) -> bool:
 
 
 def add_movie(
-    user_id: str, title: str, year: int, rating: float, poster_url: str = "N/A"
+    user_id: str,
+    title: str,
+    year: int,
+    rating: float,
+    poster_url: str = "N/A",
+    country: str = "N/A",
 ) -> bool:
     """Add a movie to the given user's own list.
 
@@ -168,14 +171,16 @@ def add_movie(
         else:
             result = connection.execute(
                 text(
-                    "INSERT INTO movies (title, year, rating, poster_url) "
-                    "VALUES (:title, :year, :rating, :poster_url)"
+                    "INSERT INTO movies (title, year, rating, poster_url, country) "
+                    "VALUES (:title, :year, :rating, :poster_url, :country)"
                 ),
                 {
                     "title": title,
                     "year": year,
                     "rating": rating,
-                    "poster_url": poster_url},
+                    "poster_url": poster_url,
+                    "country": country
+                },
             )
             movie_id = result.lastrowid
 
