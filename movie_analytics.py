@@ -5,16 +5,16 @@ import random
 import matplotlib.pyplot as plt
 
 from colors import Fore, bold, error, info, menu, rating_formatted, success
-from models import Movie
+from models import MovieWithNote
 from movie_utils import levenshtein_distance
 
 from storage import movie_storage_sql as storage
 
 
-def generate_analytics() -> None:
+def generate_analytics(user_id: str) -> None:
     """Show summary statistics for the movie database."""
     print("\n" * 50)  # Clear the console
-    movies = storage.list_movies()
+    movies = storage.list_user_movies(user_id)
 
     if not movies:
         print("No movies in the database to analyze.")
@@ -75,12 +75,12 @@ def generate_analytics() -> None:
     print(menu("Median rating: " + rating_formatted(median_rating)))
 
 
-def fetch_random_movie() -> None:
+def fetch_random_movie(user_id: str) -> None:
     """Display a random movie from the database."""
 
     print("\n" * 50)  # Clear the console
 
-    movies = storage.list_movies()
+    movies = storage.list_user_movies(user_id)
 
     if not movies:
         print("No movies in the database to fetch.")
@@ -96,11 +96,11 @@ def fetch_random_movie() -> None:
     print(f"Rating: {rating_formatted(movie['rating'])}")
 
 
-def search_movies() -> None:
+def search_movies(user_id: str) -> None:
     """Search the movie database by title using direct and fuzzy matching."""
     print("\n" * 50)  # Clear the console#
 
-    movies = storage.list_movies()
+    movies = storage.list_user_movies(user_id)
 
     search_query = input("What movie are you looking for?: ")
 
@@ -108,7 +108,7 @@ def search_movies() -> None:
         print("Please enter a movie title to search for.")
         return
 
-    search_results: dict[int, Movie] = {}
+    search_results: dict[int, MovieWithNote] = {}
 
     for movie_id, movie in movies.items():
         title = movie["title"]
@@ -168,11 +168,11 @@ def search_movies() -> None:
         )
 
 
-def sort_movies_by_rating() -> None:
+def sort_movies_by_rating(user_id: str) -> None:
     """Show movies sorted by rating, highest first."""
     print("\n" * 50)  # Clear the console
 
-    movies = storage.list_movies()
+    movies = storage.list_user_movies(user_id)
 
     sorted_movies = sorted(
         movies.items(), key=lambda item: item[1]["rating"], reverse=True
@@ -199,11 +199,11 @@ def sort_movies_by_rating() -> None:
         )
 
 
-def create_rating_histogram() -> None:
+def create_rating_histogram(user_id: str) -> None:
     """Create a histogram of movie ratings."""
     print("\n" * 50)  # Clear the console
 
-    movies = storage.list_movies()
+    movies = storage.list_user_movies(user_id)
 
     if not movies:
         print("No movies in the database to create a histogram.")

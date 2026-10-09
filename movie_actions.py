@@ -6,11 +6,11 @@ from movie_api import get_movie_from_api, search_movies_from_api
 from storage import movie_storage_sql as storage
 
 
-def list_movies() -> None:
+def list_movies(user_id: str) -> None:
     """
-    Lists all the movies in the database along with their ratings.
+    Lists the current user's own movies along with their ratings.
     """
-    movies = storage.list_movies()
+    movies = storage.list_user_movies(user_id)
 
     print("\n" * 50)  # Clear the console
     print("=" * 40)
@@ -58,7 +58,7 @@ def _display_movie_search_results(movies: list[dict]) -> None:
         )
 
 
-def add_movie() -> None:
+def add_movie(user_id: str) -> None:
     """Add a movie to the database."""
     print("\n" * 50)  # Clear the console
 
@@ -120,7 +120,7 @@ def add_movie() -> None:
     movie_rating = float(movie["imdbRating"])
     poster_url = movie.get("Poster", "N/A")
 
-    if storage.movie_exists(movie_title):
+    if storage.movie_exists(user_id, movie_title):
         print(
             warning("Movie already exists: ")
             + bold(movie_title)
@@ -129,7 +129,11 @@ def add_movie() -> None:
         return
 
     if storage.add_movie(
-        title=movie_title, year=movie_year, rating=movie_rating, poster_url=poster_url
+        user_id,
+        title=movie_title,
+        year=movie_year,
+        rating=movie_rating,
+        poster_url=poster_url,
     ):
         print(
             success("Movie added: ")
@@ -142,13 +146,17 @@ def add_movie() -> None:
         print(error("Failed to save the movie."))
 
 
-def update_movie_notes() -> None:
+def update_movie_notes(user_id: str) -> None:
     """Update user notes on a movie"""
     print("\n" * 50)  # Clear the console
 
-    movies = storage.list_movies()
+    movies = storage.list_user_movies(user_id)
 
-    list_movies()
+    if not movies:
+        print(info("You have no movies in your list yet. Add one before noting it."))
+        return
+
+    list_movies(user_id)
     while True:
         id_input = input(
             "\nUpdate movie notes by entering the ID - (or q to cancel): "
@@ -181,7 +189,8 @@ def update_movie_notes() -> None:
         + menu("Current rating: ")
         + f"({rating_formatted(movie['rating'])}/10)"
     )
-    print(info("Note: " ) + bold(movie['note']) or "N/A")
+    current_note = movie["note"]
+    print(info("Note: ") + bold(current_note))
     note = input(
                 "Add note to movie or (or q to cancel): "
             ).strip()
@@ -194,7 +203,7 @@ def update_movie_notes() -> None:
         print(error("Notes must be between 2 and 60 characters.")) 
         return
 
-    if storage.update_movie(movie_id, note):
+    if storage.update_movie(user_id, movie_id, note):
         print(
             success("Note added for ")
             + bold(movie["title"])
@@ -204,11 +213,16 @@ def update_movie_notes() -> None:
         print(error("Failed to save the updated note."))
 
 
-def delete_movie() -> None:
-    """Delete a movie from the database."""
+def delete_movie(user_id: str) -> None:
+    """Delete a movie from the current user's own list."""
     print("\n" * 50)  # Clear the console
-    movies = storage.list_movies()
-    list_movies()
+    movies = storage.list_user_movies(user_id)
+
+    if not movies:
+        print(info("You have no movies in your list to delete."))
+        return
+
+    list_movies(user_id)
     while True:
         id_input = input(
             "Enter the ID of the movie you want to delete " "(or q to cancel): "
@@ -259,7 +273,7 @@ def delete_movie() -> None:
 
         print(error("Please enter y or n."))
 
-    if storage.delete_movie(movie_id):
+    if storage.delete_movie(user_id, movie_id):
         print(success("Movie deleted: ") + bold(movie["title"]) + f" ({movie['year']})")
     else:
         print(error("Failed to delete the movie."))

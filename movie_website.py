@@ -1,10 +1,11 @@
 """Static HTML movie website generator."""
 
 import html
+import re
 
 import config
 from colors import error, success
-from models import Movie
+from models import MovieWithNote
 
 from storage import movie_storage_sql as storage
 
@@ -17,7 +18,7 @@ MOVIE_ITEM_TEMPLATE = """    <li>
     </li>"""
 
 
-def _build_movie_grid(movies: dict[int, Movie]) -> str:
+def _build_movie_grid(movies: dict[int, MovieWithNote]) -> str:
     """Render the HTML for the movie grid from the stored movies."""
     items = []
     for movie in movies.values():
@@ -27,30 +28,35 @@ def _build_movie_grid(movies: dict[int, Movie]) -> str:
             if poster_url == "N/A"
             else f'<img class="movie-poster" src="{html.escape(poster_url)}" alt=""/>'
         )
-        note = movie['note']
+        note = movie["note"]
         note_html = (
             ""
             if note == "N/A"
-            else f'<div class="movie-note">"{note}"</div>'
+            else f'<div class="movie-note">"{html.escape(note)}"</div>'
         )
         items.append(
             MOVIE_ITEM_TEMPLATE.format(
                 poster_html=poster_html,
                 title=html.escape(movie["title"]),
                 year=movie["year"],
-                note_html=note_html
-
+                note_html=note_html,
             )
         )
     return "\n".join(items)
 
 
-def generate_website() -> None:
-    """Generate a static HTML website listing all movies."""
-    movies = storage.list_movies()
+def _safe_filename(user_name: str) -> str:
+    """Sanitize a username into a safe filename component."""
+    safe = re.sub(r"[^A-Za-z0-9_-]", "_", user_name)
+    return safe or "user"
+
+
+def generate_website(user_id: str, user_name: str) -> None:
+    """Generate a static HTML website listing the given user's movies."""
+    movies = storage.list_user_movies(user_id)
 
     if not movies:
-        print("No movies in the database to add to the website.")
+        print("You have no movies in your list to add to the website.")
         return
 
     try:
@@ -59,14 +65,17 @@ def generate_website() -> None:
         print(error(f"Could not read website template: {e}"))
         return
 
-    page = template.replace("__TEMPLATE_TITLE__", "My Movie App").replace(
+    title = f"{html.escape(user_name)}'s Movie App"
+    page = template.replace("__TEMPLATE_TITLE__", title).replace(
         "__TEMPLATE_MOVIE_GRID__", _build_movie_grid(movies)
     )
 
+    output_file = config.STATIC_DIR / f"{_safe_filename(user_name)}.html"
+
     try:
-        config.OUTPUT_HTML_FILE.write_text(page)
+        output_file.write_text(page)
     except OSError as e:
         print(error(f"Could not write website file: {e}"))
         return
 
-    print(success(f"Website generated successfully: {config.OUTPUT_HTML_FILE}"))
+    print(success(f"Website generated successfully: {output_file}"))
