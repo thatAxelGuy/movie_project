@@ -6,3 +6,5 @@ class Movie(TypedDict):
     year: int
     rating: float
     poster_url: str
+    note: str
+    country: str

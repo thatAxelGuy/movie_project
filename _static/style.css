@@ -32,7 +32,8 @@ body {
 }
 
 .movie-title,
-.movie-year {
+.movie-year,
+.movie-note {
   font-size: 0.8em;
   text-align: center;
 }
@@ -41,7 +42,8 @@ body {
   margin-top: 10px;
 }
 
-.movie-year {
+.movie-year,
+.movie-note {
   color: #999;
 }
 

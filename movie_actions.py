@@ -142,8 +142,8 @@ def add_movie() -> None:
         print(error("Failed to save the movie."))
 
 
-def update_movie_rating() -> None:
-    """Update an existing movie rating."""
+def update_movie_notes() -> None:
+    """Update user notes on a movie"""
     print("\n" * 50)  # Clear the console
 
     movies = storage.list_movies()
@@ -151,7 +151,7 @@ def update_movie_rating() -> None:
     list_movies()
     while True:
         id_input = input(
-            "\nEnter the ID of the movie to update (or q to cancel): "
+            "\nUpdate movie notes by entering the ID - (or q to cancel): "
         ).strip()
 
         if id_input.lower() == "q":
@@ -181,36 +181,27 @@ def update_movie_rating() -> None:
         + menu("Current rating: ")
         + f"({rating_formatted(movie['rating'])}/10)"
     )
+    print(info("Note: " ) + bold(movie['note']) or "N/A")
+    note = input(
+                "Add note to movie or (or q to cancel): "
+            ).strip()
+    
+    if note.lower() == "q":
+        print(info("Update rating was cancelled."))
+        return
+    
+    if not 2 <= len(note) <= 60:
+        print(error("Notes must be between 2 and 60 characters.")) 
+        return
 
-    while True:
-
-        rating_input = input(
-            "Enter the new rating for the movie (0-10) -" " (or q to cancel): "
-        ).strip()
-
-        if rating_input.lower() == "q":
-            print(info("Update rating was cancelled."))
-            return
-
-        try:
-
-            new_rating = float(rating_input)
-
-            if 0 <= new_rating <= 10:
-                break
-            print(error("Rating must be between 0 and 10."))
-
-        except ValueError:
-            print(error("Invalid input. Please enter a valid rating (0-10)."))
-
-    if storage.update_movie(movie_id, new_rating):
+    if storage.update_movie(movie_id, note):
         print(
-            success("Rating updated for ")
+            success("Note added for ")
             + bold(movie["title"])
-            + f" to {rating_formatted(new_rating)}/10."
+            + success(">> Note added: ") + note
         )
     else:
-        print(error("Failed to save the updated rating."))
+        print(error("Failed to save the updated note."))
 
 
 def delete_movie() -> None:

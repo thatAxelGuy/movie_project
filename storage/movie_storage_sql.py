@@ -19,7 +19,9 @@ def init_db() -> None:
                 title TEXT UNIQUE NOT NULL,
                 year INTEGER NOT NULL,
                 rating REAL NOT NULL,
-                poster_url TEXT
+                poster_url TEXT,
+                note TEXT,
+                country TEXT
             )
         """))
         connection.commit()
@@ -30,7 +32,7 @@ def list_movies() -> dict[int, Movie]:
     with engine.connect() as connection:
         result = connection.execute(
             text(
-                "SELECT id, title, year, rating, poster_url FROM movies"
+                "SELECT id, title, year, rating, poster_url, note, country FROM movies"
             )
         )
         movies = result.fetchall()
@@ -40,7 +42,9 @@ def list_movies() -> dict[int, Movie]:
             "title": row[1],
             "year": row[2],
             "rating": row[3],
-            "poster_url": row[4] or "N/A"}
+            "poster_url": row[4] or "N/A",
+            "note": row[5] or "N/A", 
+            "country": row[6] or "N/A"}
             for row in movies
         }
 
@@ -87,12 +91,12 @@ def delete_movie(movie_id: int) -> bool:
         return result.rowcount > 0
 
 
-def update_movie(movie_id: int, rating: float) -> bool:
+def update_movie(movie_id: int, note: str) -> bool:
     """Update a movie rating in the database."""
     with engine.connect() as connection:
         result = connection.execute(
-            text("UPDATE movies SET rating = :rating " "WHERE id = :id"),
-            {"id": movie_id, "rating": rating},
+            text("UPDATE movies SET note = :note " "WHERE id = :id"),
+            {"id": movie_id, "note": note},
         )
         connection.commit()
         return result.rowcount > 0

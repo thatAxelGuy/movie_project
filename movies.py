@@ -3,7 +3,7 @@
 from collections.abc import Callable
 
 from colors import error, info, menu, warning
-from movie_actions import add_movie, delete_movie, list_movies, update_movie_rating
+from movie_actions import add_movie, delete_movie, list_movies, update_movie_notes
 from movie_analytics import (
     create_rating_histogram,
     fetch_random_movie,
@@ -26,7 +26,7 @@ def run_menu() -> None:
         (warning("Exit"), None),
         ("View all movies", list_movies),
         ("Add a new movie", add_movie),
-        ("Update a movie rating", update_movie_rating),
+        ("Update movie notes", update_movie_notes),
         ("Show Statistics", generate_analytics),
         ("Show a random movie", fetch_random_movie),
         ("Search movies", search_movies),

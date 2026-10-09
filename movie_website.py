@@ -12,6 +12,7 @@ MOVIE_ITEM_TEMPLATE = """    <li>
       <div class="movie">
         {poster_html}<div class="movie-title">{title}</div>
         <div class="movie-year">{year}</div>
+        {note_html}
       </div>
     </li>"""
 
@@ -26,11 +27,19 @@ def _build_movie_grid(movies: dict[int, Movie]) -> str:
             if poster_url == "N/A"
             else f'<img class="movie-poster" src="{html.escape(poster_url)}" alt=""/>'
         )
+        note = movie['note']
+        note_html = (
+            ""
+            if note == "N/A"
+            else f'<div class="movie-note">"{note}"</div>'
+        )
         items.append(
             MOVIE_ITEM_TEMPLATE.format(
                 poster_html=poster_html,
                 title=html.escape(movie["title"]),
                 year=movie["year"],
+                note_html=note_html
+
             )
         )
     return "\n".join(items)
